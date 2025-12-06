@@ -11,16 +11,28 @@ class RoleSeeder extends Seeder
     {
         Role::insert([
             [
+                'name' => 'superadmin',
+                'description' => 'Control total del sistema Sitiando',
+            ],
+            [
                 'name' => 'admin',
-                'description' => 'Administrador del sistema',
+                'description' => 'Administración avanzada del comercio',
             ],
             [
                 'name' => 'operador',
-                'description' => 'Operador del panel',
+                'description' => 'Gestión operativa del panel',
             ],
             [
                 'name' => 'vendedor',
-                'description' => 'Gestión de ventas',
+                'description' => 'Manejo de ventas y tickets',
+            ],
+            [
+                'name' => 'afiliado',
+                'description' => 'Acceso al panel de comisiones y referidos',
+            ],
+            [
+                'name' => 'analista',
+                'description' => 'Análisis de informes y reportes',
             ],
         ]);
     }

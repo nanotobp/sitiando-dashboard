@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique(); // ejemplo: superadmin, admin, operador, vendedor, afiliado
+            $table->string('description')->nullable(); // descripción visible en el panel
             $table->timestamps();
         });
     }

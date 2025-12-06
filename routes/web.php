@@ -6,10 +6,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/fix-migrate', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
-    return "Migraciones reseteadas y seeders ejecutados.";
-});
+
 use App\Http\Controllers\AuthController;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -29,4 +26,17 @@ Route::middleware('auth')->group(function () {
 });
 Route::middleware('auth')->group(function () {
     Route::resource('productos', ProductController::class);
+});
+
+Route::get('/force-rollback', function () {
+    Artisan::call('migrate:rollback --force');
+    Artisan::call('migrate:rollback --force');
+    Artisan::call('migrate:rollback --force');
+    Artisan::call('migrate:rollback --force');
+    Artisan::call('migrate:rollback --force');
+    return "Rollback ejecutado varias veces.";
+});
+Route::get('/drop-users', function () {
+    Schema::dropIfExists('users');
+    return "users eliminada";
 });
