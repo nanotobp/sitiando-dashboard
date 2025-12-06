@@ -5,8 +5,9 @@
 
     <div>
         {{ Auth::user()->email }}
-        <form method="POST" action="/logout" class="d-inline">
-            @csrf
+        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+    @csrf
+
             <button class="btn btn-danger btn-sm">Salir</button>
         </form>
     </div>
