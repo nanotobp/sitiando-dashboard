@@ -1,19 +1,22 @@
 FROM php:8.2-fpm
 
-# Instalar extensiones obligatorias de Laravel
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip git && \
-    docker-php-ext-install pdo pdo_mysql zip
+    libzip-dev zip unzip git curl && \
+    docker-php-ext-install pdo pdo_mysql zip mbstring tokenizer
 
-# Instalar composer
+# Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Copiar todo el proyecto
 COPY . .
 
+# Instalar dependencias Laravel
 RUN composer install --no-dev --optimize-autoloader
 
+# Permisos correctos
 RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8080
