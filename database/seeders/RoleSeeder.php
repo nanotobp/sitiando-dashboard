@@ -9,7 +9,7 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::insert([
+        $roles = [
             [
                 'name' => 'superadmin',
                 'description' => 'Control total del sistema Sitiando',
@@ -34,6 +34,13 @@ class RoleSeeder extends Seeder
                 'name' => 'analista',
                 'description' => 'Análisis de informes y reportes',
             ],
-        ]);
+        ];
+
+        foreach ($roles as $data) {
+            Role::updateOrCreate(
+                ['name' => $data['name']],  // lookup
+                ['description' => $data['description']] // update if exists
+            );
+        }
     }
 }
