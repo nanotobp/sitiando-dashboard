@@ -1,4 +1,5 @@
-@extends('layout')
+@extends('layouts.dashboard')
+
 
 @section('content')
 <h1 class="fw-bold text-white mb-4">Editar Producto</h1>

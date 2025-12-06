@@ -1,4 +1,5 @@
-@extends('layout')
+@extends('layouts.dashboard')
+
 
 @section('content')
 
