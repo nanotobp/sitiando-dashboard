@@ -6,8 +6,7 @@
 
     <title>Sitiando Dashboard</title>
 
-    {{-- CSS global --}}
-    <link rel="stylesheet" href="{{ asset('css/sitiando.css') }}">
+   
 
     {{-- CSS exclusivo del dashboard --}}
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
@@ -36,4 +35,4 @@
 
 </body>
 </html>
-<!-- fix cache -->
+<!-- force rebild -->
