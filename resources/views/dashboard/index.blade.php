@@ -2,75 +2,74 @@
 
 @section('content')
 
-{{-- TÍTULO --}}
+{{-- ============================================
+     TÍTULO
+============================================ --}}
 <h1 class="title">Dashboard general</h1>
 
-{{-- ================================
-     CARDS KPI (con sparklines)
-================================ --}}
+
+{{-- ============================================
+     KPI CARDS (con sparklines)
+============================================ --}}
 <div class="cards">
 
     <div class="card kpi-card">
         <div class="kpi-header">
             <h3>Usuarios</h3>
-            <span class="kpi-change positive">+12%</span>
+            <p class="kpi-number">{{ $totalUsuarios }}</p>
         </div>
-
-        <p>{{ $totalUsuarios }}</p>
-
-        <canvas class="sparkline" id="sparkUsuarios"></canvas>
+        <div class="kpi-sparkline">
+            <canvas id="sparkUsuarios" height="40"></canvas>
+        </div>
     </div>
 
     <div class="card kpi-card">
         <div class="kpi-header">
             <h3>Productos</h3>
-            <span class="kpi-change positive">+5%</span>
+            <p class="kpi-number">{{ $totalProductos }}</p>
         </div>
-
-        <p>{{ $totalProductos }}</p>
-
-        <canvas class="sparkline" id="sparkProductos"></canvas>
+        <div class="kpi-sparkline">
+            <canvas id="sparkProductos" height="40"></canvas>
+        </div>
     </div>
 
     <div class="card kpi-card">
         <div class="kpi-header">
             <h3>Órdenes</h3>
-            <span class="kpi-change negative">−3%</span>
+            <p class="kpi-number">{{ $totalOrders }}</p>
         </div>
-
-        <p>{{ $totalOrders }}</p>
-
-        <canvas class="sparkline" id="sparkOrders"></canvas>
+        <div class="kpi-sparkline">
+            <canvas id="sparkOrders" height="40"></canvas>
+        </div>
     </div>
 
     <div class="card kpi-card">
         <div class="kpi-header">
             <h3>Afiliados</h3>
-            <span class="kpi-change positive">+22%</span>
+            <p class="kpi-number">{{ $totalAffiliates }}</p>
         </div>
-
-        <p>{{ $totalAffiliates }}</p>
-
-        <canvas class="sparkline" id="sparkAffiliates"></canvas>
+        <div class="kpi-sparkline">
+            <canvas id="sparkAffiliates" height="40"></canvas>
+        </div>
     </div>
 
     <div class="card kpi-card">
         <div class="kpi-header">
             <h3>Ventas del mes</h3>
-            <span class="kpi-change positive">+18%</span>
+            <p class="kpi-number">${{ number_format($ventasMes, 0) }}</p>
         </div>
-
-        <p>${{ number_format($ventasMes, 0) }}</p>
-
-        <canvas class="sparkline" id="sparkVentasMes"></canvas>
+        <div class="kpi-sparkline">
+            <canvas id="sparkVentasMes" height="40"></canvas>
+        </div>
     </div>
 
 </div>
 
 
-{{-- ================================
-     GRÁFICO: Crecimiento de ingresos
-================================ --}}
+
+{{-- ============================================
+     GRÁFICO: CRECIMIENTO DE INGRESOS
+============================================ --}}
 <h2 class="subtitle">Crecimiento de ingresos</h2>
 
 <div class="card">
@@ -78,9 +77,10 @@
 </div>
 
 
-{{-- ================================
-     GRÁFICO: Retención
-================================ --}}
+
+{{-- ============================================
+     GRÁFICO: RETENCIÓN DE CLIENTES
+============================================ --}}
 <h2 class="subtitle">Retención de clientes</h2>
 
 <div class="card">
@@ -88,9 +88,10 @@
 </div>
 
 
-{{-- ================================
-     TABLA – Últimos productos
-================================ --}}
+
+{{-- ============================================
+     TABLA – ÚLTIMOS PRODUCTOS
+============================================ --}}
 <h2 class="subtitle">Últimos productos</h2>
 
 <div class="card">
@@ -117,9 +118,10 @@
 </div>
 
 
-{{-- ================================
-     TABLA – Últimas órdenes
-================================ --}}
+
+{{-- ============================================
+     TABLA – ÚLTIMAS ÓRDENES
+============================================ --}}
 <h2 class="subtitle">Últimas órdenes</h2>
 
 <div class="card">
