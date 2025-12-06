@@ -1,27 +1,8 @@
 <?php
+// TEST SIMPLE PARA RAILWAY
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-define('LARAVEL_START', microtime(true));
-
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
-}
-
-require __DIR__.'/../vendor/autoload.php';
-
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
-    http_response_code(200);
-    exit;
-}
-
-$kernel = $app->make(Kernel::class);
-
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
-
-$kernel->terminate($request, $response);
+http_response_code(200);
+echo "OK - HEALTHCHECK";
