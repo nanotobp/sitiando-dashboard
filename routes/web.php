@@ -22,3 +22,11 @@ Route::middleware('auth')->group(function () {
         return "Bienvenido al Dashboard de Sitiando";
     });
 });
+use App\Http\Controllers\DashboardController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+Route::middleware('auth')->group(function () {
+    Route::resource('productos', ProductController::class);
+});
