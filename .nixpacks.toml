@@ -1,10 +1,19 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.pdo_mysql", "php82Extensions.pdo_pgsql", "php82Extensions.mbstring", "php82Extensions.curl"]
+nixPkgs = [
+  "php82",
+  "php82Extensions.pdo_mysql",
+  "php82Extensions.pdo_pgsql",
+  "php82Extensions.mbstring",
+  "php82Extensions.curl",
+  "php82Extensions.openssl",
+  "php82Extensions.zip"
+]
 
 [phases.build]
 cmds = [
   "composer install --no-dev --optimize-autoloader",
-  "php artisan migrate --force",
+  "php artisan key:generate",
+  "php artisan migrate:fresh --force",
   "php artisan db:seed --force"
 ]
 
