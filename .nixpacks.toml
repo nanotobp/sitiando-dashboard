@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["php", "php82", "php82Extensions.curl", "php82Extensions.mbstring", "php82Extensions.pdo_mysql", "php82Extensions.pdo_pgsql"]
+nixPkgs = ["php82", "php82Extensions.pdo_mysql", "php82Extensions.pdo_pgsql", "php82Extensions.mbstring", "php82Extensions.curl"]
 
 [start]
 cmd = "php artisan serve --host=0.0.0.0 --port=8080"
