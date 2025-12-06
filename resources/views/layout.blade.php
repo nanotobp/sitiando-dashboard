@@ -3,43 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Sitiando Dashboard</title>
 
-    {{-- CSS externo --}}
-    <link rel="stylesheet" href="/css/sitiando.css">
+    {{-- CSS global --}}
+    <link rel="stylesheet" href="{{ asset('css/sitiando.css') }}">
 
-    {{-- Dashforge (opcional, si querés estilos similares al theme) --}}
-    <link rel="stylesheet" href="https://jenil.github.io/dashforge/css/dashforge.css">
+    {{-- CSS exclusivo del dashboard --}}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
 
-<body>
+<body class="dashboard-body">
 
-<div class="wrapper">
+    {{-- HEADER --}}
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1>Sitiando</h1>
+        </div>
 
-    {{-- Sidebar --}}
-    <div class="sidebar">
-        <h2>Sitiando</h2>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/productos">Productos</a>
-        <form action="/logout" method="POST">
-            @csrf
-            <button class="logout-btn" style="background:none;border:none;padding:0;margin-top:20px;">
-                Cerrar sesión
-            </button>
-        </form>
-    </div>
+        <div class="header-right">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="logout-btn">Cerrar sesión</button>
+            </form>
+        </div>
+    </header>
 
-    {{-- Barra superior --}}
-    <div class="topnav">
-        <span>Panel de Control</span>
-    </div>
-
-    {{-- Contenido dinámico --}}
-    <div class="content">
+    {{-- CONTENIDO --}}
+    <main class="dashboard-main">
         @yield('content')
-    </div>
-
-</div>
+    </main>
 
 </body>
 </html>

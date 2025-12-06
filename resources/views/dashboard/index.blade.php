@@ -2,27 +2,35 @@
 
 @section('content')
 
-<div class="card">
-    <h3>Bienvenido, {{ auth()->user()->name }}</h3>
-    <p>Este es el panel principal de Sitiando.</p>
-</div>
+<div class="container dashboard-container">
 
-<div class="card">
-    <h3>Resumen</h3>
-    <table class="table">
-        <tr>
-            <th>Métrica</th>
-            <th>Valor</th>
-        </tr>
-        <tr>
-            <td>Productos totales</td>
-            <td>{{ $totalProductos ?? 0 }}</td>
-        </tr>
-        <tr>
-            <td>Usuarios</td>
-            <td>{{ $totalUsuarios ?? 0 }}</td>
-        </tr>
-    </table>
+    <h1 class="dashboard-title">Panel General</h1>
+    <p class="dashboard-subtitle">Resumen ejecutivo del negocio</p>
+
+    <div class="cards-wrapper">
+
+        <div class="card-item">
+            <h3>Usuarios</h3>
+            <span class="value">{{ $totalUsuarios }}</span>
+        </div>
+
+        <div class="card-item">
+            <h3>Productos</h3>
+            <span class="value">{{ $totalProductos }}</span>
+        </div>
+
+        <div class="card-item">
+            <h3>Pedidos</h3>
+            <span class="value">{{ $totalPedidos }}</span>
+        </div>
+
+        <div class="card-item">
+            <h3>Afiliados</h3>
+            <span class="value">{{ $totalAfiliados }}</span>
+        </div>
+
+    </div>
+
 </div>
 
 @endsection
