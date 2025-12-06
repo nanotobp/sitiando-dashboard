@@ -1,106 +1,45 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitiando Dashboard</title>
 
-    {{-- Dashforge Core --}}
-    <link rel="stylesheet" href="/dashforge.min.css">
+    {{-- CSS externo --}}
+    <link rel="stylesheet" href="/css/sitiando.css">
 
-    <style>
-        body {
-            background: #0f1117;
-            color: #fff;
-            overflow-x: hidden;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        .sidebar {
-            width: 240px;
-            background: #16191f;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding: 20px 0;
-            transition: width .25s ease;
-        }
-
-        .sidebar.collapsed {
-            width: 80px;
-        }
-
-        .sidebar .menu-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            color: #adb5bd;
-        }
-
-        .sidebar .menu-item:hover {
-            background: rgba(255,255,255,0.06);
-            color: #fff;
-        }
-
-        .sidebar.collapsed .menu-label {
-            opacity: 0;
-            width: 0;
-        }
-
-        .content {
-            margin-left: 240px;
-            padding: 30px;
-            transition: margin-left .25s;
-        }
-
-        .sidebar.collapsed ~ .content {
-            margin-left: 80px;
-        }
-
-        .header {
-            background: #13151b;
-            padding: 15px 30px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .collapse-btn {
-            cursor: pointer;
-            font-size: 22px;
-        }
-    </style>
+    {{-- Dashforge (opcional, si querés estilos similares al theme) --}}
+    <link rel="stylesheet" href="https://jenil.github.io/dashforge/css/dashforge.css">
 </head>
 
 <body>
 
-    {{-- SIDEBAR --}}
-    @include('partials.sidebar')
+<div class="wrapper">
 
-    {{-- CONTENT AREA --}}
-    <div class="content">
-
-        {{-- HEADER --}}
-        @include('partials.header')
-
-        {{-- MAIN CONTENT --}}
-        @yield('content')
-
+    {{-- Sidebar --}}
+    <div class="sidebar">
+        <h2>Sitiando</h2>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/productos">Productos</a>
+        <form action="/logout" method="POST">
+            @csrf
+            <button class="logout-btn" style="background:none;border:none;padding:0;margin-top:20px;">
+                Cerrar sesión
+            </button>
+        </form>
     </div>
 
-    <script>
-        const sidebar = document.querySelector('.sidebar');
-        const collapseBtn = document.querySelector('#collapseSidebar');
+    {{-- Barra superior --}}
+    <div class="topnav">
+        <span>Panel de Control</span>
+    </div>
 
-        collapseBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-        });
-    </script>
+    {{-- Contenido dinámico --}}
+    <div class="content">
+        @yield('content')
+    </div>
+
+</div>
 
 </body>
 </html>

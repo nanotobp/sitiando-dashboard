@@ -1,0 +1,115 @@
+/* ============================================
+   BASE
+============================================ */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #f5f6fa;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont;
+    color: #333;
+}
+
+/* Contenedor general */
+.wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================
+   SIDEBAR
+============================================ */
+.sidebar {
+    width: 240px;
+    background: #1f2532;
+    color: #fff;
+    padding: 20px;
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+}
+
+.sidebar h2 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 0;
+    color: #cfd3da;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.sidebar a:hover {
+    color: #fff;
+}
+
+/* ============================================
+   NAV SUPERIOR
+============================================ */
+.topnav {
+    margin-left: 240px;
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #e4e6eb;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    justify-content: space-between;
+}
+
+.topnav span {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.logout-btn {
+    color: #c0392b;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ============================================
+   CONTENIDO
+============================================ */
+.content {
+    margin-left: 240px;
+    padding: 30px;
+}
+
+/* Tarjetas */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    margin-top: 0;
+    font-size: 19px;
+    font-weight: 600;
+}
+
+/* Tabla */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.table th, .table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.table th {
+    text-align: left;
+    background: #f0f2f5;
+}
+
