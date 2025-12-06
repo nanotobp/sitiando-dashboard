@@ -1,0 +1,7 @@
+name = "sitiando-tracking"
+main = "src/worker.js"
+compatibility_date = "2024-05-01"
+
+[vars]
+LARAVEL_API_URL = "https://go.sitiando.com/api/affiliates/track-click-edge"
+SECRET_KEY = "6fa6091a72928a40859fa5f7bf3556305ce50d40e4c5d51dcfe1211fcb3c406f"
