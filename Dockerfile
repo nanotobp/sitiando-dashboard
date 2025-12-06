@@ -1,31 +1,31 @@
-# ----------------------------------------
-# BASE: PHP 8.4 + FPM
-# ----------------------------------------
+# -------------------------------
+# Base PHP 8.4 FPM
+# -------------------------------
 FROM php:8.4-fpm
 
-# ----------------------------------------
+# -------------------------------
 # Instalar dependencias del sistema
-# ----------------------------------------
+# -------------------------------
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     zip \
-    curl \
     libpq-dev \
-    libpng-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    libicu-dev \
-    libfreetype6-dev \
+    libpng-dev \
     libjpeg62-turbo-dev \
-    && docker-php-ext-configure intl \
-    && docker-php-ext-install intl
+    libfreetype6-dev
 
-# ----------------------------------------
-# Extensiones de PHP necesarias para Laravel
-# ----------------------------------------
+# -------------------------------
+# Configurar e instalar GD correctamente
+# -------------------------------
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+
+# -------------------------------
+# Instalar extensiones PHP
+# -------------------------------
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -36,41 +36,40 @@ RUN docker-php-ext-install \
     zip \
     opcache
 
-# GD fix (muy común en Railway)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-
-# ----------------------------------------
+# -------------------------------
 # Instalar Composer
-# ----------------------------------------
+# -------------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# ----------------------------------------
-# Setear carpeta de trabajo
-# ----------------------------------------
+# -------------------------------
+# Setear directorio de trabajo
+# -------------------------------
 WORKDIR /var/www
 
-# Copiar código
+# Copiar el código
 COPY . .
 
-# ----------------------------------------
+# -------------------------------
 # Instalar dependencias de Laravel
-# ----------------------------------------
+# -------------------------------
 RUN composer install --no-dev --optimize-autoloader
 
-# Generar APP_KEY (no falla si ya existe)
+# -------------------------------
+# Generar APP_KEY si no existe
+# -------------------------------
 RUN php artisan key:generate || true
 
-# ----------------------------------------
-# Permisos recomendados
-# ----------------------------------------
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# -------------------------------
+# DAR PERMISOS
+# -------------------------------
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# ----------------------------------------
-# Exponer puerto Laravel
-# ----------------------------------------
-EXPOSE 8000
+# -------------------------------
+# Railway usa el puerto 8080
+# -------------------------------
+EXPOSE 8080
 
-# ----------------------------------------
-# Comando de inicio
-# ----------------------------------------
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# -------------------------------
+# Comando de inicio CORRECTO
+# -------------------------------
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
