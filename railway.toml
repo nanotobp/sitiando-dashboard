@@ -1,5 +1,2 @@
 [build]
-nixpacks = { enable = true }
-
-[deploy]
-startCommand = "php -S 0.0.0.0:8080 -t public"
+builder = "Dockerfile"
