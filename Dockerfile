@@ -3,7 +3,7 @@
 # ============================
 FROM php:8.2-fpm AS build
 
-# Dependencias del sistema para desarrollo
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     zip unzip git curl libzip-dev libpng-dev libpq-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo_mysql pdo_pgsql zip gd
@@ -13,10 +13,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copiar archivos del proyecto
+# Copiar composer files
 COPY composer.json composer.lock ./
 
-# Instalar dependencias con cache y sin dev
+# Instalar dependencias de producción
 RUN composer install \
     --no-dev \
     --prefer-dist \
@@ -24,41 +24,37 @@ RUN composer install \
     --no-interaction \
     --no-scripts
 
-# Copiar el resto del proyecto
+# Copiar el resto del código
 COPY . .
 
 # Permisos correctos
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Opcional: Optimizar Laravel si no usás closures en rutas
-# RUN php artisan config:cache
-# RUN php artisan route:cache
-# RUN php artisan view:cache
-
 
 # ============================
-# STAGE 2 — Imagen FINAL
+# STAGE 2 — Imagen FINAL (producción)
 # ============================
 FROM php:8.2-fpm AS production
 
-# Instalar solo dependencias necesarias en runtime
+# Solo las extensiones necesarias en runtime
 RUN apt-get update && apt-get install -y \
     zip unzip libzip-dev libpng-dev libpq-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql zip gd
+    && docker-php-ext-install pdo_mysql pdo_pgsql zip gd \
+    && docker-php-ext-enable opcache  # ← OPcache ya viene activado, solo lo aseguramos
 
-# Activar OPcache para producción
-RUN docker-php-ext-enable opcache
-
-# Configuración OPcache optimizada
-COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+# ¡ELIMINAMOS ESTA LÍNEA QUE CAUSABA EL ERROR!
+# COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+# → No necesitas ese archivo. PHP 8.2+ ya trae una configuración excelente por defecto.
 
 WORKDIR /var/www/html
 
-# Copiar lo generado en el build
+# Copiar todo desde el stage de build
 COPY --from=build /var/www/html /var/www/html
 
-# Exponer puerto de Laravel
+# Exponer puerto (Railway lo ignora, pero está bien tenerlo)
 EXPOSE 8000
 
-# Comando de inicio
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# ¡¡IMPORTANTE!! Cambia el comando final para producción en Railway
+# Railway NO necesita que ejecutes "php artisan serve"
+# Usa php-fpm directamente (es más rápido y estable)
+CMD ["php-fpm"]
