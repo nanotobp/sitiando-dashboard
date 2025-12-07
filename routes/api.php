@@ -4,40 +4,51 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\AffiliateController;
-use App\Http\Controllers\API\TrackingController;
+//use App\Http\Controllers\API\TrackingController;
 use App\Http\Controllers\API\CommissionController;
 use App\Http\Controllers\API\PayoutController;
 use App\Http\Controllers\API\MediaKitController;
 use App\Http\Controllers\API\CampaignController;
 use App\Http\Controllers\API\AffiliateDashboardController;
-use App\Http\Controllers\API\TrackingController;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes — Sitiando PRO
+|--------------------------------------------------------------------------
+| Acá definimos las rutas de la API de Sitiando.
+| Algunas son públicas (tracking) y otras requieren Supabase Auth.
+|--------------------------------------------------------------------------
+*/
 
+/*
+|--------------------------------------------------------------------------
+| 🔓 RUTAS PÚBLICAS
+|--------------------------------------------------------------------------
+*/
+
+// Ping test
+Route::get('/ping', fn () => response()->json(['pong' => true]));
+
+// Tracking WEB (frontend normal)
+//Route::post('/track', [TrackingController::class, 'trackClick']);
+
+// Tracking desde Cloudflare Worker (usa secret)
+// Esta ruta es suficiente y no necesitamos la versión anidada en 'affiliates'.
+//Route::post('/track-edge', [TrackingController::class, 'trackClickEdge']);
 
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| 🔐 RUTAS PROTEGIDAS POR SUPABASE AUTH
 |--------------------------------------------------------------------------
-|
-| Acá definimos las rutas de la API de Sitiando.
-| Algunas son públicas (tracking) y otras requieren Supabase Auth.
-|
 */
-
-// ✅ Ruta simple para probar que el backend responde
-Route::get('/ping', function () {
-    return response()->json(['pong' => true]);
-});
-
-// ✅ Endpoint que puede usar Cloudflare Worker para registrar clics
-//    (si querés, después le agregamos un token interno o firma)
-Route::post('/track', [TrackingController::class, 'trackClick']);
-
-// 🔐 RUTAS PROTEGIDAS POR SUPABASE AUTH
 Route::middleware('supabase.auth')->group(function () {
 
-    // Datos básicos del usuario autenticado (debug + útil para frontend)
+    /*
+    |--------------------------------------------------------------------------
+    | Usuario autenticado (debug + frontend)
+    |--------------------------------------------------------------------------
+    */
     Route::get('/me', function (Request $request) {
         return response()->json([
             'success'  => true,
@@ -46,28 +57,56 @@ Route::middleware('supabase.auth')->group(function () {
         ]);
     });
 
-    // Afiliados
+
+    /*
+    |--------------------------------------------------------------------------
+    | AFFILIATES (CRUD + Dashboard)
+    |--------------------------------------------------------------------------
+    */
     Route::prefix('affiliates')->group(function () {
+
         Route::get('/', [AffiliateController::class, 'index']);
         Route::post('/', [AffiliateController::class, 'store']);
         Route::get('/{id}', [AffiliateController::class, 'show']);
-        Route::get('/affiliates/me/dashboard', [AffiliateDashboardController::class, 'me']);
-        Route::post('/affiliates/track-click-edge', [TrackingController::class, 'trackClickEdge']);
 
+        // Dashboard personal del afiliado
+        Route::get('/me/dashboard', [AffiliateDashboardController::class, 'me']);
+
+        // Tracking EDGE interno: Se ha ELIMINADO la ruta duplicada aquí.
+        // Route::post('/track-click-edge', [TrackingController::class, 'trackClickEdge']); 
     });
 
 
-    // Comisiones
+    /*
+    |--------------------------------------------------------------------------
+    | COMISIONES
+    |--------------------------------------------------------------------------
+    */
     Route::post('/commissions/generate', [CommissionController::class, 'generate']);
 
-    // Payouts
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAYOUTS (liquidaciones)
+    |--------------------------------------------------------------------------
+    */
     Route::post('/payouts/generate', [PayoutController::class, 'generate']);
 
-    // Media Kit
+
+    /*
+    |--------------------------------------------------------------------------
+    | MEDIA KIT (descargas)
+    |--------------------------------------------------------------------------
+    */
     Route::get('/media-kit', [MediaKitController::class, 'index']);
     Route::get('/media-kit/{id}/download', [MediaKitController::class, 'download']);
 
-    // Campañas
+
+    /*
+    |--------------------------------------------------------------------------
+    | CAMPAÑAS
+    |--------------------------------------------------------------------------
+    */
     Route::get('/campaigns', [CampaignController::class, 'index']);
     Route::get('/campaigns/{id}', [CampaignController::class, 'show']);
 });
