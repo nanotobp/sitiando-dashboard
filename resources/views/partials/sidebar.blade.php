@@ -17,12 +17,12 @@
         </div>
 
         <div class="menu-item" onclick="location.href='/productos'">
-            <i class="fa fa-box'></i>
+            <i class="fa fa-box"></i>
             <span class="menu-label">Productos</span>
         </div>
 
         <div class="menu-item" onclick="location.href='/categorias'">
-            <i class="fa fa-tags'></i>
+            <i class="fa fa-tags"></i>
             <span class="menu-label">Categorías</span>
         </div>
     @endif

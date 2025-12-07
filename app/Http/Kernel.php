@@ -37,7 +37,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // Si querés rate limit:
+            // Rate limit opcional:
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -60,7 +60,11 @@ class Kernel extends HttpKernel
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // 🔐 Nuestro middleware de Supabase
+        // 🔐 Middleware de Supabase (tu proyecto ya lo tenía)
         'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
+
+        // 🔐 Middleware agregado para roles (punto E)
+        'role'             => \App\Http\Middleware\RoleMiddleware::class,   // 1 solo rol
+        'roles'            => \App\Http\Middleware\RolesMiddleware::class,  // múltiples roles
     ];
 }

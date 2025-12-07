@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 use App\Models\Role;
 use App\Models\Affiliate;
@@ -12,7 +13,7 @@ use App\Models\Order;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasUuids;
 
     /**
      * Campos asignables masivamente
@@ -24,7 +25,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Ocultar campos sensibles en arrays / JSON
+     * Ocultar campos sensibles
      */
     protected $hidden = [
         'password',
@@ -48,8 +49,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relación uno a uno con afiliado
-     * (solo para usuarios que sean vendedores/afiliados)
+     * Relación con afiliado (uno a uno)
      */
     public function affiliate()
     {
@@ -61,11 +61,11 @@ class User extends Authenticatable
      */
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'user_id');
     }
 
     /**
-     * Helper: verificar si usuario tiene un rol
+     * Helper: verificar rol
      */
     public function hasRole(string $roleName): bool
     {
@@ -78,6 +78,7 @@ class User extends Authenticatable
     public function assignRole(string $roleName)
     {
         $role = Role::where('name', $roleName)->first();
+        
         if ($role) {
             $this->roles()->syncWithoutDetaching([$role->id]);
         }

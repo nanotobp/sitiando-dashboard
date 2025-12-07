@@ -412,3 +412,319 @@ html, body {
     height: 40px !important;
     margin-top: 12px;
 }
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.kpi-number {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-strong, #fff);
+}
+
+.kpi-sparkline {
+    width: 100%;
+    height: 40px;
+}
+/* ============================================
+   TITLE BLOCK + SUBTEXT
+============================================ */
+.df-title-block {
+    margin-bottom: 32px;
+}
+
+.subtitle-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: -6px;
+}
+
+/* ============================================
+   SECTION BLOCK
+   (espaciado vertical entre módulos)
+============================================ */
+.section-block {
+    margin-top: 48px;
+}
+
+/* ============================================
+   KPI GRID (usado por el loop de KPIs)
+============================================ */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+/* ============================================
+   CHART CARDS
+============================================ */
+.chart-card {
+    padding: 24px;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: auto;
+}
+
+/* ============================================
+   TABLE CARD (wrapper para tablas)
+============================================ */
+.table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* ============================================
+   SUBTITLE (refuerzo)
+============================================ */
+.subtitle {
+    margin-bottom: 16px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* ============================================
+   CARD FIXES (para que todo sea consistente)
+============================================ */
+.card h3 {
+    letter-spacing: 0.06em;
+}
+
+.card.chart-card:hover,
+.card.table-card:hover {
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   KPI CARDS (refinamiento visual)
+============================================ */
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 14px;
+}
+
+.kpi-header h3 {
+    margin-bottom: 6px;
+}
+
+.kpi-number {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.kpi-sparkline {
+    margin-top: 10px;
+    height: 40px;
+}
+
+.kpi-sparkline canvas {
+    width: 100% !important;
+    height: 40px !important;
+}
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge.pending   { background: rgba(250, 204, 21, 0.20); color: #eab308; }
+.badge.paid      { background: rgba(34,197,94,0.20); color: #22c55e; }
+.badge.failed    { background: rgba(239,68,68,0.20); color: #ef4444; }
+.badge.shipped   { background: rgba(59,130,246,0.20); color: #3b82f6; }
+.badge.completed { background: rgba(139,92,246,0.20); color: #8b5cf6; }
+.timeline {
+    margin-top: 12px;
+    padding-left: 20px;
+    border-left: 2px solid var(--border-subtle);
+}
+
+.timeline-item {
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    left: -7px;
+    top: 3px;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.timeline-status {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+/* TIMELINE ANIMADO */
+.timeline {
+    margin-top: 16px;
+    padding-left: 22px;
+    border-left: 2px solid var(--border-subtle);
+}
+
+.timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: fadeSlide 0.45s ease forwards;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.05s; }
+.timeline-item:nth-child(2) { animation-delay: 0.12s; }
+.timeline-item:nth-child(3) { animation-delay: 0.18s; }
+.timeline-item:nth-child(4) { animation-delay: 0.24s; }
+.timeline-item:nth-child(5) { animation-delay: 0.30s; }
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    left: -7px;
+    top: 4px;
+}
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Colores automáticos por estado */
+.badge-pending   { background: rgba(250,204,21,.18); color:#eab308; }
+.badge-paid      { background: rgba(34,197,94,.18); color:#22c55e; }
+.badge-failed    { background: rgba(239,68,68,.18); color:#ef4444; }
+.badge-shipped   { background: rgba(59,130,246,.18); color:#3b82f6; }
+.badge-completed { background: rgba(139,92,246,.18); color:#8b5cf6; }
+.badge-refunded  { background: rgba(255,255,255,.18); color:#999; }
+
+/* BADGES DE ESTADO */
+.badge {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-pending   { background: rgba(250,204,21,.18); color:#eab308; }
+.badge-paid      { background: rgba(34,197,94,.18); color:#22c55e; }
+.badge-failed    { background: rgba(239,68,68,.18); color:#ef4444; }
+.badge-shipped   { background: rgba(59,130,246,.18); color:#3b82f6; }
+.badge-completed { background: rgba(139,92,246,.18); color:#8b5cf6; }
+.badge-refunded  { background: rgba(255,255,255,.18); color:#999; }
+
+/* SIDEBAR INTERNO */
+.order-nav a {
+    display: block;
+    padding: 6px 0;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 14px;
+}
+.order-nav a:hover { color: var(--primary); }
+
+/* TIMELINE */
+.timeline {
+    padding-left: 22px;
+    border-left: 2px solid var(--border-subtle);
+}
+.timeline-item {
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: fadeSlide 0.45s ease forwards;
+}
+.timeline-item:nth-child(1) { animation-delay: .05s; }
+.timeline-item:nth-child(2) { animation-delay: .12s; }
+.timeline-item:nth-child(3) { animation-delay: .18s; }
+.timeline-item:nth-child(4) { animation-delay: .24s; }
+.timeline-item:nth-child(5) { animation-delay: .30s; }
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    left: -7px;
+    top: 3px;
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+/* GRID DE FILTROS */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+    gap: 16px;
+}
+
+.filter-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+/* Inputs */
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+}
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+.card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}

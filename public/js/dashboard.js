@@ -1,43 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // THEME TOGGLE
     const body = document.body;
     const btn = document.getElementById('theme-toggle');
+    const icon = btn ? btn.querySelector('.theme-icon') : null;
+    const label = btn ? btn.querySelector('.theme-label') : null;
 
-    if (!btn) return;
-
-    // cargar tema guardado
-    const saved = localStorage.getItem('sitiando_theme');
-    if (saved === 'dark') {
+    const storedTheme = localStorage.getItem('sitiando-theme');
+    if (storedTheme === 'dark') {
         body.classList.remove('theme-light');
         body.classList.add('theme-dark');
-        updateLabel(true);
+        if (icon) icon.textContent = '🌙';
+        if (label) label.textContent = 'Modo oscuro';
     }
 
-    btn.addEventListener('click', () => {
-        const isDark = body.classList.contains('theme-dark');
-        if (isDark) {
-            body.classList.remove('theme-dark');
-            body.classList.add('theme-light');
-            localStorage.setItem('sitiando_theme', 'light');
-            updateLabel(false);
-        } else {
-            body.classList.remove('theme-light');
-            body.classList.add('theme-dark');
-            localStorage.setItem('sitiando_theme', 'dark');
-            updateLabel(true);
-        }
-    });
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const isDark = body.classList.toggle('theme-dark');
+            body.classList.toggle('theme-light', !isDark);
 
-    function updateLabel(dark) {
-        const icon = btn.querySelector('.theme-icon');
-        const label = btn.querySelector('.theme-label');
-        if (!icon || !label) return;
+            if (icon) icon.textContent = isDark ? '🌙' : '🌞';
+            if (label) label.textContent = isDark ? 'Modo oscuro' : 'Modo claro';
 
-        if (dark) {
-            icon.textContent = '🌙';
-            label.textContent = 'Modo oscuro';
-        } else {
-            icon.textContent = '🌞';
-            label.textContent = 'Modo claro';
-        }
+            localStorage.setItem('sitiando-theme', isDark ? 'dark' : 'light');
+        });
     }
+
+    // Si en el futuro agregás botón de abrir/cerrar sidebar en mobile, lo manejamos acá.
 });

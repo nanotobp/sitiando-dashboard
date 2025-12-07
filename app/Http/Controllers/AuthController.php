@@ -2,40 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
-class AuthController extends Controller
+class UserController extends Controller
 {
-    public function showLogin()
+    public function index()
     {
-        return view('login');
-    }
+        $users = User::with('roles')
+            ->orderBy('name')
+            ->paginate(20);
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended('/dashboard');
-        }
-
-        return back()->withErrors([
-            'email' => 'Credenciales incorrectas.',
+        return view('admin.users.index', [
+            'users' => $users,
         ]);
     }
 
-    public function logout(Request $request)
+    public function show(User $user)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $user->load(['roles', 'orders']);
 
-        return redirect('/login');
+        return view('admin.users.show', [
+            'user' => $user,
+        ]);
     }
 }

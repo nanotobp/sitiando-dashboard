@@ -2,83 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Product;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $productos = Product::orderBy('id', 'desc')->paginate(12);
-        return view('productos.index', compact('productos'));
+        $products = Product::orderBy('name')->paginate(20);
+
+        return view('admin.products.index', [
+            'products' => $products,
+        ]);
     }
 
     public function create()
     {
-        return view('productos.create');
+        return view('admin.products.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|min:3',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'imagen' => 'nullable|image|max:2048',
+        $data = $request->validate([
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'nullable|integer|min:0',
+            'description' => 'nullable|string',
         ]);
-
-        $data = $request->only(['nombre', 'precio', 'stock']);
-        $data['activo'] = true;
-
-        if ($request->hasFile('imagen')) {
-            $path = $request->file('imagen')->store('productos', 'public');
-            $data['imagen'] = $path;
-        }
 
         Product::create($data);
 
-        return redirect('/productos')->with('ok', 'Producto creado correctamente.');
+        return redirect()
+            ->route('admin.products.index')
+            ->with('success', 'Producto creado correctamente.');
     }
 
-    public function edit(Product $producto)
+    public function edit(Product $product)
     {
-        return view('productos.edit', compact('producto'));
+        return view('admin.products.edit', [
+            'product' => $product,
+        ]);
     }
 
-    public function update(Request $request, Product $producto)
+    public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'nombre' => 'required|min:3',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'imagen' => 'nullable|image|max:2048',
+        $data = $request->validate([
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'nullable|integer|min:0',
+            'description' => 'nullable|string',
         ]);
 
-        $producto->update($request->only(['nombre', 'precio', 'stock']));
+        $product->update($data);
 
-        if ($request->hasFile('imagen')) {
-
-            if ($producto->imagen) {
-                Storage::disk('public')->delete($producto->imagen);
-            }
-
-            $path = $request->file('imagen')->store('productos', 'public');
-            $producto->imagen = $path;
-            $producto->save();
-        }
-
-        return redirect('/productos')->with('ok', 'Producto actualizado correctamente.');
+        return redirect()
+            ->route('admin.products.index')
+            ->with('success', 'Producto actualizado correctamente.');
     }
 
-    public function destroy(Product $producto)
+    public function destroy(Product $product)
     {
-        if ($producto->imagen) {
-            Storage::disk('public')->delete($producto->imagen);
-        }
+        $product->delete();
 
-        $producto->delete();
-
-        return redirect('/productos')->with('ok', 'Producto eliminado.');
+        return redirect()
+            ->route('admin.products.index')
+            ->with('success', 'Producto eliminado.');
     }
 }

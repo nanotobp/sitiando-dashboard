@@ -36,6 +36,13 @@
             "Tests\\": "tests/"
         }
     },
+    
+    "autoload": {
+        "files": [
+           "app/helpers.php"
+         ]
+    },
+    
     "scripts": {
         "setup": [
             "composer install",
