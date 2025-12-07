@@ -17,11 +17,10 @@ use App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 | Web Routes — Sitiando Ecommerce PRO
 |--------------------------------------------------------------------------
-| IMPORTANTE:
-| - Prefijo /admin para todas las rutas internas de backoffice.
-| - Middleware auth obligatorio.
-| - Namespaces coherentes: admin.*
-| - Sin duplicaciones.
+| - Todas las rutas de backoffice están en /admin
+| - Todo el admin requiere auth
+| - Se usan bindings correctos para UUID
+| - Se elimina uso de {id} para modelos UUID
 |--------------------------------------------------------------------------
 */
 
@@ -32,7 +31,7 @@ Route::middleware(['auth'])
 
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD GENERAL
+    | DASHBOARD PRO
     |--------------------------------------------------------------------------
     */
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -50,6 +49,7 @@ Route::middleware(['auth'])
             [AffiliateAnalyticsController::class, 'index']
         )->name('analytics.affiliates');
 
+        // ← Si el afiliado usa UUID, acá sí debemos usar {id} porque NO es User
         Route::get('/analytics/affiliates/{id}',
             [AffiliateAnalyticsDetailController::class, 'show']
         )->name('analytics.affiliates.show');
@@ -58,7 +58,7 @@ Route::middleware(['auth'])
 
     /*
     |--------------------------------------------------------------------------
-    | GESTIÓN DE USUARIOS DEL SISTEMA (solo admin)
+    | USUARIOS DEL SISTEMA (ADMIN ONLY) — UUID SAFE
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->group(function () {
@@ -66,16 +66,17 @@ Route::middleware(['auth'])
         Route::get('/users', [UserController::class, 'index'])
             ->name('users.index');
 
+        // UUID binding correcto
         Route::get('/users/{user}', [UserController::class, 'show'])
             ->name('users.show');
 
-        Route::get('/users/{id}/role', [UserController::class, 'editRole'])
+        Route::get('/users/{user}/role', [UserController::class, 'editRole'])
             ->name('users.editRole');
 
-        Route::post('/users/{id}/role', [UserController::class, 'updateRole'])
+        Route::post('/users/{user}/role', [UserController::class, 'updateRole'])
             ->name('users.updateRole');
 
-        Route::get('/users/{id}/permissions', [UserController::class, 'permissions'])
+        Route::get('/users/{user}/permissions', [UserController::class, 'permissions'])
             ->name('users.permissions');
     });
 
@@ -90,6 +91,7 @@ Route::middleware(['auth'])
         Route::get('/roles', [RoleController::class, 'index'])
             ->name('roles.index');
 
+        // Roles no usan UUID, así que {id} es correcto
         Route::get('/roles/{id}', [RoleController::class, 'show'])
             ->name('roles.show');
 
@@ -141,7 +143,7 @@ Route::middleware(['auth'])
         Route::post('/payouts/{id}/proof', [AffiliatePayoutController::class, 'uploadProof'])
             ->name('payouts.uploadProof');
 
-        // Exportaciones CSV
+        // EXPORT CSV
         Route::get('/payouts/{id}/export/csv',
             [AffiliatePayoutController::class, 'exportCsv']
         )->name('payouts.export.csv');
@@ -154,7 +156,7 @@ Route::middleware(['auth'])
 
     /*
     |--------------------------------------------------------------------------
-    | CARRITOS ADMIN (solo admin + manager)
+    | CARRITOS ADMIN (admin + manager)
     |--------------------------------------------------------------------------
     */
     Route::middleware(['roles:admin,manager'])->group(function () {
@@ -177,6 +179,7 @@ Route::middleware(['auth'])
         Route::get('/orders', [OrderController::class, 'index'])
             ->name('orders.index');
 
+        // Orders pueden ser integer o UUID → si en tu DB son INT, esto está perfecto
         Route::get('/orders/{order}', [OrderController::class, 'show'])
             ->name('orders.show');
 
@@ -221,9 +224,10 @@ Route::middleware(['auth'])
 });
 
 
+
 /*
 |--------------------------------------------------------------------------
-| CARRITO (Frontend)
+| CARRITO (Frontend / Usuario logueado)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -281,12 +285,14 @@ Route::get('/payment/cancel', [\App\Http\Controllers\PaymentController::class, '
     ->name('payment.cancel');
 
 
+
 /*
 |--------------------------------------------------------------------------
 | HOME: redirige al dashboard
 |--------------------------------------------------------------------------
 */
 Route::get('/', fn () => redirect()->route('admin.dashboard'));
+
 
 
 /*
