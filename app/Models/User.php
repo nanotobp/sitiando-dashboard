@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+// ← Quitamos HasUuids porque ya NO queremos UUID
+// use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 use App\Models\Role;
 use App\Models\Affiliate;
@@ -14,16 +16,17 @@ use App\Models\Cart;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUuids;
+    use HasFactory, Notifiable; // ← HasUuids eliminado
 
     /**
-     * UUID config
+     * Forzamos que use IDs enteros autoincrementales (bigIncrements)
+     * Esto soluciona el error "invalid input syntax for type uuid: 7"
      */
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;           // ← Antes era false
+    protected $keyType = 'int';            // ← Antes era 'string'
 
     /**
-     * Campos asignables masivamente
+     * Atributos asignables masivamente.
      */
     protected $fillable = [
         'name',
@@ -32,7 +35,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Ocultar campos sensibles
+     * Atributos ocultos en serialización.
      */
     protected $hidden = [
         'password',
@@ -40,60 +43,54 @@ class User extends Authenticatable
     ];
 
     /**
-     * Casts automáticos
+     * Casts modernos (Laravel 10+ style)
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'id' => 'integer', // ← Recomendado para reforzar que es entero
+        ];
+    }
 
-    /**
-     * Un usuario puede tener varios roles
-     */
+    /* ===========================================================
+       RELACIONES PARA SITIANDO PRO (Marketplace + Afiliados + Roles)
+       =========================================================== */
+
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles');
     }
 
-    /**
-     * Relación con afiliado (uno a uno)
-     */
     public function affiliate()
     {
         return $this->hasOne(Affiliate::class);
     }
 
-    /**
-     * Relación con órdenes del ecommerce
-     */
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id');
     }
 
-    /**
-     * Relación con carritos
-     */
     public function carts()
     {
         return $this->hasMany(Cart::class, 'user_id');
     }
 
-    /**
-     * Helper: verificar rol
-     */
+    /* ===========================================================
+       HELPERS PRO
+       =========================================================== */
+
     public function hasRole(string $roleName): bool
     {
         return $this->roles()->where('name', $roleName)->exists();
     }
 
-    /**
-     * Helper: asignar rol
-     */
     public function assignRole(string $roleName)
     {
         $role = Role::where('name', $roleName)->first();
-        
+
         if ($role) {
             $this->roles()->syncWithoutDetaching([$role->id]);
         }
