@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -39,9 +39,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('admin.products.edit', [
-            'product' => $product,
-        ]);
+        return view('admin.products.edit', compact('product'));
     }
 
     public function update(Request $request, Product $product)
@@ -66,6 +64,6 @@ class ProductController extends Controller
 
         return redirect()
             ->route('admin.products.index')
-            ->with('success', 'Producto eliminado.');
+            ->with('success', 'Producto eliminado correctamente.');
     }
 }

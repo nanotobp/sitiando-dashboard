@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
 
 class DashboardController extends Controller
@@ -24,11 +25,6 @@ class DashboardController extends Controller
     {
         $data = $this->dashboardService->getAdminDashboard();
 
-        // La vista recibe:
-        // - $kpis
-        // - $recent_orders
-        // - $top_affiliates
-        // - $charts
         return view('admin.dashboard.index', $data);
     }
 }

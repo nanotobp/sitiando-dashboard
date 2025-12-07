@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;   // ← ESTA LÍNEA ES LA CORRECTA
 use App\Services\AffiliateService;
 use Illuminate\Http\Request;
 

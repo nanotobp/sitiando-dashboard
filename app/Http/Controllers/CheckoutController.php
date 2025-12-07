@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
+use App\Http\Controllers\Controller;
 
 class CheckoutController extends Controller
 {
@@ -38,30 +39,21 @@ class CheckoutController extends Controller
         $request->validate([
             'customer_name'  => 'required|string|min:3',
             'customer_email' => 'required|email',
-            'customer_phone' => 'required|string|min:6',
         ]);
 
         $user = $request->user();
 
-        $cart = Cart::with('items')->where('user_id', $user->id)->where('status', 'active')->first();
-
-        if (!$cart || $cart->items->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'No hay productos en el carrito.');
-        }
-
-        // Crear número de orden único
-        $orderNumber = 'ORD-' . str_pad(Order::count() + 1, 4, '0', STR_PAD_LEFT);
+        $cart = Cart::with(['items.product'])
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->firstOrFail();
 
         // Crear orden
         $order = Order::create([
             'user_id'        => $user->id,
-            'order_number'   => $orderNumber,
             'customer_name'  => $request->customer_name,
             'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'subtotal'       => $cart->items->sum('total'),
-            'discount'       => 0,
-            'total'          => $cart->items->sum('total'),
+            'total'          => $cart->total,
             'status'         => 'pending',
         ]);
 
@@ -70,34 +62,25 @@ class CheckoutController extends Controller
             OrderItem::create([
                 'order_id'   => $order->id,
                 'product_id' => $item->product_id,
-                'qty'        => $item->qty,
-                'price'      => $item->price,
-                'total'      => $item->total,
+                'quantity'   => $item->quantity,
+                'price'      => $item->product->price,
+                'subtotal'   => $item->quantity * $item->product->price,
             ]);
         }
 
-        // Crear registro de pago (pendiente)
+        // Registrar pago base
         OrderPayment::create([
-            'order_id'       => $order->id,
-            'status'         => 'pending',
-            'amount'         => $order->total,
-            'payment_method' => 'bancard',
-            'transaction_id' => 'TX-' . uniqid(),
+            'order_id' => $order->id,
+            'amount'   => $order->total,
+            'method'   => 'manual',
+            'status'   => 'pending'
         ]);
 
-        // Vaciar carrito
-        $cart->items()->delete();
-        $cart->update(['total' => 0, 'status' => 'processed']);
+        // Cerrar el carrito
+        $cart->update(['status' => 'completed']);
 
-        return redirect()->route('checkout.success', $order->id);
-    }
-
-    /**
-     * Pantalla de éxito
-     */
-    public function success($orderId)
-    {
-        $order = Order::findOrFail($orderId);
-        return view('checkout.success', compact('order'));
+        return redirect()
+            ->route('orders.show', $order->id)
+            ->with('success', 'Compra realizada con éxito.');
     }
 }
