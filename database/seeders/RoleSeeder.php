@@ -11,27 +11,27 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => 'superadmin',
+                'name' => 'SuperAdmin',
                 'description' => 'Control total del sistema Sitiando',
             ],
             [
-                'name' => 'admin',
+                'name' => 'Admin',
                 'description' => 'Administración avanzada del comercio',
             ],
             [
-                'name' => 'operador',
+                'name' => 'Operador',
                 'description' => 'Gestión operativa del panel',
             ],
             [
-                'name' => 'vendedor',
+                'name' => 'VendedorExterno',
                 'description' => 'Manejo de ventas y tickets',
             ],
             [
-                'name' => 'afiliado',
+                'name' => 'Afiliado',
                 'description' => 'Acceso al panel de comisiones y referidos',
             ],
             [
-                'name' => 'analista',
+                'name' => 'Analista',
                 'description' => 'Análisis de informes y reportes',
             ],
         ];

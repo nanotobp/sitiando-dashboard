@@ -14,10 +14,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ejecutar seeders principales del sistema
+        // Seeders principales que siempre deben existir
         $this->call([
-            RoleSeeder::class,
-            AdminUserSeeder::class,
+            RoleSeeder::class,          // crea roles base
+            AdminUserSeeder::class,     // crea usuario SuperAdmin
+            AbilitySeeder::class,       // crea abilities
+            RoleAbilitySeeder::class,   // asigna abilities al SuperAdmin
+            OrderSeeder::class,         // órdenes de prueba
+            CartSeeder::class,          // 🛒 carritos + items de prueba
         ]);
     }
 }

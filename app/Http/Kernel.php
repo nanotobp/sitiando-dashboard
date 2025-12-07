@@ -3,16 +3,14 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Console\Scheduling\Schedule;
 
 class Kernel extends HttpKernel
 {
     /**
-     * The application's global HTTP middleware stack.
-     *
-     * @var array<int, class-string|string>
+     * GLOBAL MIDDLEWARE
      */
     protected $middleware = [
-        // middleware globales...
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -22,9 +20,7 @@ class Kernel extends HttpKernel
     ];
 
     /**
-     * The application's route middleware groups.
-     *
-     * @var array<string, array<int, class-string|string>>
+     * GROUP MIDDLEWARE
      */
     protected $middlewareGroups = [
         'web' => [
@@ -34,20 +30,19 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+
+            // 🛒 TRACKING DE CARRITO
+            \App\Http\Middleware\CartActivityMiddleware::class,
         ],
 
         'api' => [
-            // Rate limit opcional:
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
     /**
-     * The application's route middleware.
-     *
-     * @var array<string, class-string|string>
+     * ROUTE MIDDLEWARE
      */
     protected $routeMiddleware = [
         'auth'             => \App\Http\Middleware\Authenticate::class,
@@ -60,11 +55,20 @@ class Kernel extends HttpKernel
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // 🔐 Middleware de Supabase (tu proyecto ya lo tenía)
+        // 🔐 Middleware de Supabase
         'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
 
-        // 🔐 Middleware agregado para roles (punto E)
-        'role'             => \App\Http\Middleware\RoleMiddleware::class,   // 1 solo rol
-        'roles'            => \App\Http\Middleware\RolesMiddleware::class,  // múltiples roles
+        // 🔐 Roles
+        'role'             => \App\Http\Middleware\RoleMiddleware::class,
+        'roles'            => \App\Http\Middleware\RolesMiddleware::class,
     ];
+
+    /**
+     * CRON TASKS — Scheduler
+     */
+    protected function schedule(Schedule $schedule)
+    {
+        // 🛒 Detectar carritos abandonados cada 5 minutos
+        $schedule->command('carts:detect-abandoned')->everyFiveMinutes();
+    }
 }

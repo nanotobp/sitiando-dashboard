@@ -1,65 +1,32 @@
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof Chart === 'undefined') return;
+document.addEventListener("DOMContentLoaded", () => {
 
-    const payload = window.dashboardCharts || {};
-    const labels = payload.labels || [];
-    const revenue = payload.revenue || [];
-    const orders = payload.orders || [];
-
-    // REVENUE CHART (línea)
-    const revenueCanvas = document.getElementById('revenueChart');
-    if (revenueCanvas) {
-        new Chart(revenueCanvas.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Ingresos',
-                    data: revenue,
-                    tension: 0.35,
-                    fill: true,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
+    if (!window.dashboardCharts) {
+        console.error("❌ No se encontró window.dashboardCharts");
+        return;
     }
 
-    // ORDERS CHART (barras)
-    const ordersCanvas = document.getElementById('ordersChart');
-    if (ordersCanvas) {
-        new Chart(ordersCanvas.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Órdenes',
-                    data: orders,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
+    const charts = window.dashboardCharts;
 
-    // Sparklines (simple: reutilizamos revenue y orders)
-    const sparkRevenue = document.getElementById('spark-revenue');
-    if (sparkRevenue) {
-        new Chart(sparkRevenue.getContext('2d'), {
-            type: 'line',
+    /* ============================================================
+       SPARKLINES (KPIs)
+    ============================================================ */
+    function renderSparkline(id, data) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        new Chart(el, {
+            type: "line",
             data: {
-                labels: labels,
-                datasets: [{
-                    data: revenue,
-                    borderWidth: 1,
-                    pointRadius: 0
-                }]
+                labels: data.map((_, i) => i),
+                datasets: [
+                    {
+                        data: data,
+                        borderColor: "#3B82F6",
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.35,
+                    },
+                ],
             },
             options: {
                 responsive: true,
@@ -67,84 +34,88 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { display: false },
-                    y: { display: false }
-                }
-            }
+                    y: { display: false },
+                },
+            },
         });
     }
 
-    const sparkOrders = document.getElementById('spark-orders');
-    if (sparkOrders) {
-        new Chart(sparkOrders.getContext('2d'), {
-            type: 'line',
+    renderSparkline("sparkRevenue", charts.sparkRevenue);
+    renderSparkline("sparkOrders", charts.sparkOrders);
+    renderSparkline("sparkTicket", charts.sparkTicket);
+    renderSparkline("sparkUsers", charts.sparkUsers);
+    renderSparkline("sparkAffiliates", charts.sparkAffiliates);
+
+
+    /* ============================================================
+       GRÁFICO PRINCIPAL — INGRESOS (Revenue)
+    ============================================================ */
+    const chartRevenueEl = document.getElementById("chartRevenue");
+    if (chartRevenueEl) {
+        new Chart(chartRevenueEl, {
+            type: "line",
             data: {
-                labels: labels,
-                datasets: [{
-                    data: orders,
-                    borderWidth: 1,
-                    pointRadius: 0
-                }]
+                labels: charts.revenue.map((item) => item.date),
+                datasets: [
+                    {
+                        label: "Ingresos",
+                        data: charts.revenue.map((item) => item.value),
+                        borderColor: "#2563EB",
+                        backgroundColor: "rgba(37, 99, 235, 0.15)",
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                    },
+                ],
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
                 scales: {
-                    x: { display: false },
-                    y: { display: false }
-                }
-            }
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: "rgba(0,0,0,0.05)" },
+                    },
+                    x: {
+                        grid: { display: false },
+                    },
+                },
+            },
         });
     }
 
-    // Ticket promedio sparkline (placeholder: usamos revenue)
-    const sparkTicket = document.getElementById('spark-ticket');
-    if (sparkTicket) {
-        new Chart(sparkTicket.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: revenue,
-                    borderWidth: 1,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { display: false },
-                    y: { display: false }
-                }
-            }
-        });
-    }
 
-    // Conversión sparkline (placeholder simple)
-    const sparkConversion = document.getElementById('spark-conversion');
-    if (sparkConversion) {
-        const convData = orders.map(v => v > 0 ? 100 : 0);
-        new Chart(sparkConversion.getContext('2d'), {
-            type: 'line',
+    /* ============================================================
+       GRÁFICO PRINCIPAL — ÓRDENES POR DÍA
+    ============================================================ */
+    const chartOrdersEl = document.getElementById("chartOrders");
+    if (chartOrdersEl) {
+        new Chart(chartOrdersEl, {
+            type: "bar",
             data: {
-                labels: labels,
-                datasets: [{
-                    data: convData,
-                    borderWidth: 1,
-                    pointRadius: 0
-                }]
+                labels: charts.orders.map((item) => item.date),
+                datasets: [
+                    {
+                        label: "Órdenes",
+                        data: charts.orders.map((item) => item.value),
+                        backgroundColor: "rgba(59, 130, 246, 0.3)",
+                        borderColor: "#3B82F6",
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    },
+                ],
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
                 scales: {
-                    x: { display: false },
-                    y: { display: false }
-                }
-            }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: "rgba(0,0,0,0.05)" },
+                    },
+                    x: {
+                        grid: { display: false },
+                    },
+                },
+            },
         });
     }
 });

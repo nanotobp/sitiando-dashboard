@@ -2,180 +2,145 @@
 
 @section('content')
 
-<div class="df-title-block">
-    <h1 class="title">Resumen general</h1>
-    <p class="subtitle-text">
-        Visión rápida de las ventas, ingresos y comportamiento de los clientes en Sitiando.
-    </p>
-</div>
+<div class="content-wrapper">
+    <div class="content-inner">
 
-{{-- KPI GRID --}}
-<div class="kpi-grid">
-
-    {{-- Ingresos totales --}}
-    <div class="card kpi-card">
-        <div class="kpi-header">
-            <h3>Ingresos totales</h3>
-            @if(!is_null($chartPayload['kpis']['revenueGrowth']))
-                @php
-                    $growth = $chartPayload['kpis']['revenueGrowth'];
-                    $growthClass = $growth >= 0 ? 'positive' : 'negative';
-                    $prefix = $growth >= 0 ? '+' : '';
-                @endphp
-                <span class="kpi-change {{ $growthClass }}">
-                    {{ $prefix . number_format($growth, 1) }}% vs mes anterior
-                </span>
-            @endif
+        <!-- ============================
+             BLOQUE DE TÍTULO
+        ============================ -->
+        <div class="df-title-block">
+            <h1 class="title">Dashboard</h1>
+            <p class="subtitle-text">Resumen general del comercio en tiempo real</p>
         </div>
-        <div class="kpi-number">
-            {{ number_format($totalRevenue, 0, ',', '.') }} Gs
-        </div>
-        <div class="kpi-sparkline">
-            <canvas id="spark-revenue"></canvas>
-        </div>
-    </div>
 
-    {{-- Órdenes totales --}}
-    <div class="card kpi-card">
-        <div class="kpi-header">
-            <h3>Órdenes totales</h3>
-            <span class="kpi-change positive">
-                {{ $chartPayload['kpis']['totalOrders'] }} en total
-            </span>
+        <!-- ============================
+             GRID DE KPIs (4-6)
+        ============================ -->
+        <div class="kpi-grid">
+
+            <x-admin.kpi 
+                label="Ingresos del Mes"
+                :value="format_currency($kpis['monthly_revenue'])"
+                :change="$kpis['monthly_revenue_change']"
+                sparkId="sparkRevenue"
+            />
+
+            <x-admin.kpi 
+                label="Órdenes del Mes"
+                :value="$kpis['monthly_orders']"
+                :change="$kpis['monthly_orders_change']"
+                sparkId="sparkOrders"
+            />
+
+            <x-admin.kpi 
+                label="Ticket Promedio"
+                :value="format_currency($kpis['average_ticket'])"
+                sparkId="sparkTicket"
+            />
+
+            <x-admin.kpi 
+                label="Usuarios Nuevos"
+                :value="$kpis['new_users']"
+                :change="$kpis['new_users_change']"
+                sparkId="sparkUsers"
+            />
+
+            <x-admin.kpi 
+                label="Afiliados Activos"
+                :value="$kpis['active_affiliates']"
+                sparkId="sparkAffiliates"
+            />
+
         </div>
-        <div class="kpi-number">
-            {{ $totalOrders }}
-        </div>
-        <div class="kpi-sparkline">
-            <canvas id="spark-orders"></canvas>
-        </div>
-    </div>
 
-    {{-- Ticket promedio --}}
-    <div class="card kpi-card">
-        <div class="kpi-header">
-            <h3>Ticket promedio</h3>
-            <span class="kpi-change">
-                Basado en todas las órdenes
-            </span>
-        </div>
-        <div class="kpi-number">
-            {{ number_format($avgTicket, 0, ',', '.') }} Gs
-        </div>
-        <div class="kpi-sparkline">
-            <canvas id="spark-ticket"></canvas>
-        </div>
-    </div>
 
-    {{-- Conversión --}}
-    <div class="card kpi-card">
-        <div class="kpi-header">
-            <h3>Conversión a pago</h3>
-            <span class="kpi-change">
-                Órdenes pagadas / totales
-            </span>
-        </div>
-        <div class="kpi-number">
-            {{ $chartPayload['kpis']['conversionRate'] }}%
-        </div>
-        <div class="kpi-sparkline">
-            <canvas id="spark-conversion"></canvas>
-        </div>
-    </div>
+        <!-- ============================
+             SECCIÓN: GRÁFICOS PRINCIPALES
+        ============================ -->
+        <x-admin.section title="Actividad del Mes" text="Tendencias financieras y operativas">
 
-</div>
+            <div class="grid md:grid-cols-2 gap-5">
 
-{{-- CHARTS --}}
-<div class="cards">
+                <x-admin.chart 
+                    id="chartRevenue"
+                    title="Ingresos Mensuales"
+                />
 
-    <div class="card chart-card">
-        <h3>Ingresos por mes</h3>
-        <p class="subtitle-text">Evolución de los ingresos totales en los últimos 12 meses.</p>
-        <canvas id="revenueChart"></canvas>
-    </div>
+                <x-admin.chart 
+                    id="chartOrders"
+                    title="Órdenes por Día"
+                />
 
-    <div class="card chart-card">
-        <h3>Órdenes por mes</h3>
-        <p class="subtitle-text">Cantidad de órdenes creadas en el período.</p>
-        <canvas id="ordersChart"></canvas>
-    </div>
+            </div>
 
-</div>
+        </x-admin.section>
 
-{{-- TOPS + ÚLTIMAS ÓRDENES --}}
-<div class="cards">
 
-    {{-- Top productos --}}
-    <div class="card table-card">
-        <h3>Top productos</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cant.</th>
-                    <th>Ingresos</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($topProducts as $p)
-                    <tr>
-                        <td>{{ $p->product_name }}</td>
-                        <td>{{ $p->qty }}</td>
-                        <td>{{ number_format($p->revenue, 0, ',', '.') }} Gs</td>
-                    </tr>
-                @endforeach
-                @if($topProducts->isEmpty())
-                    <tr><td colspan="3">Sin datos aún.</td></tr>
-                @endif
-            </tbody>
-        </table>
-    </div>
+        <!-- ============================
+             SECCIÓN: TABLAS (Órdenes)
+        ============================ -->
+        <x-admin.section title="Últimas Órdenes">
 
-    {{-- Últimas órdenes --}}
-    <div class="card table-card">
-        <h3>Últimas órdenes</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Orden</th>
+            <x-admin.table>
+                <x-slot name="head">
+                    <th>ID</th>
                     <th>Cliente</th>
                     <th>Total</th>
                     <th>Estado</th>
                     <th>Fecha</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($recentOrders as $order)
+                </x-slot>
+
+                @foreach($recent_orders as $order)
                     <tr>
-                        <td>{{ $order->order_number }}</td>
+                        <td>#{{ $order->order_number }}</td>
                         <td>{{ $order->customer_name }}</td>
-                        <td>{{ number_format($order->total, 0, ',', '.') }} Gs</td>
+                        <td>{{ format_currency($order->total) }}</td>
                         <td>
-                            <span class="badge badge-{{ $order->status }}">
-                                {{ ucfirst($order->status) }}
+                            <span class="badge badge-{{ strtolower($order->status) }}">
+                                {{ $order->status }}
                             </span>
                         </td>
                         <td>{{ $order->created_at->format('d/m/Y') }}</td>
-                        <td>
-                            <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">
-                                Ver
-                            </a>
-                        </td>
                     </tr>
                 @endforeach
-                @if($recentOrders->isEmpty())
-                    <tr><td colspan="6">Sin órdenes aún.</td></tr>
-                @endif
-            </tbody>
-        </table>
-    </div>
+            </x-admin.table>
 
+        </x-admin.section>
+
+
+        <!-- ============================
+             SECCIÓN: TOP AFILIADOS
+        ============================ -->
+        <x-admin.section title="Top Afiliados del Mes">
+
+            <x-admin.table>
+                <x-slot name="head">
+                    <th>Afiliado</th>
+                    <th>Ventas</th>
+                    <th>Comisión</th>
+                    <th>Clicks</th>
+                    <th>Conversión</th>
+                </x-slot>
+
+                @foreach($top_affiliates as $a)
+                    <tr>
+                        <td>{{ $a->full_name }}</td>
+                        <td>{{ format_currency($a->total_sales) }}</td>
+                        <td>{{ format_currency($a->total_commission_earned) }}</td>
+                        <td>{{ $a->total_clicks }}</td>
+                        <td>{{ $a->conversion_rate }}%</td>
+                    </tr>
+                @endforeach
+            </x-admin.table>
+
+        </x-admin.section>
+
+    </div>
 </div>
 
-{{-- Payload para charts.js --}}
 <script>
-    window.dashboardCharts = @json($chartPayload);
+    window.dashboardCharts = @json($charts);
 </script>
+
 
 @endsection

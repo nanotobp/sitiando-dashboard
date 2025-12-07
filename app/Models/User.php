@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Models\Role;
 use App\Models\Affiliate;
 use App\Models\Order;
+use App\Models\Cart;
 
 class User extends Authenticatable
 {
@@ -37,7 +38,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed', // Laravel 10+: hashea automáticamente
+        'password' => 'hashed',
     ];
 
     /**
@@ -62,6 +63,14 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id');
+    }
+
+    /**
+     * Relación con carritos
+     */
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'user_id');
     }
 
     /**
