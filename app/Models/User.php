@@ -17,6 +17,12 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasUuids;
 
     /**
+     * UUID config
+     */
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    /**
      * Campos asignables masivamente
      */
     protected $fillable = [
