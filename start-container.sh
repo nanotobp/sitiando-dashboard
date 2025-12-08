@@ -1,7 +1,8 @@
 #!/bin/sh
+set -e
 
-# Arrancar PHP-FPM en background
+# Start PHP-FPM
 php-fpm -D
 
-# Iniciar NGINX en foreground (Railway necesita un proceso en primer plano)
+# Start nginx
 nginx -g "daemon off;"
