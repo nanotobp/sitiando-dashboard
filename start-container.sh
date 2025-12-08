@@ -1,8 +1,11 @@
 #!/bin/sh
 set -e
 
-# Start PHP-FPM
-php-fpm -D
+echo "Starting PHP-FPM..."
+php-fpm -y /usr/local/etc/php-fpm.conf -R &
 
-# Start nginx
-nginx -g "daemon off;"
+# Esperar a que FPM esté listo
+sleep 2
+
+echo "Starting Nginx..."
+exec nginx -g "daemon off;"
