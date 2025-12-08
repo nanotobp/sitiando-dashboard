@@ -1,11 +1,7 @@
 #!/bin/sh
-set -e
 
-# Migraciones (seguras en Railway)
-php artisan migrate --force || true
-
-# Iniciar PHP-FPM
+# Arrancar PHP-FPM en background
 php-fpm -D
 
-# Iniciar Nginx en primer plano
+# Iniciar NGINX en foreground (Railway necesita un proceso en primer plano)
 nginx -g "daemon off;"
