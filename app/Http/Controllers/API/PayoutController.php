@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;
 use App\Services\PayoutService;
 use App\Models\Affiliate;
 use Illuminate\Http\Request;
@@ -27,7 +27,7 @@ class PayoutController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $payout
+            'data' => $payout,
         ]);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use Illuminate\Http\Request;
 
@@ -17,7 +17,7 @@ class CampaignController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $campaigns
+            'data' => $campaigns,
         ]);
     }
 
@@ -30,7 +30,7 @@ class CampaignController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $campaign
+            'data' => $campaign,
         ]);
     }
 }

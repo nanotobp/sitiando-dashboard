@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Http\Controllers\API;
-use App\Http\Controller;
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Affiliate;
 use App\Models\AffiliateClick;
@@ -24,11 +26,10 @@ class TrackingController extends Controller
      */
     public function trackClickEdge(Request $request)
     {
-        // Validación de seguridad opcional
         if ($request->secret !== env('TRACKING_SECRET')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid secret'
+                'message' => 'Invalid secret',
             ], 403);
         }
 
@@ -45,7 +46,7 @@ class TrackingController extends Controller
         if (!$ref) {
             return response()->json([
                 'success' => false,
-                'message' => 'Missing ref'
+                'message' => 'Missing ref',
             ], 400);
         }
 
@@ -54,24 +55,24 @@ class TrackingController extends Controller
         if (!$affiliate) {
             return response()->json([
                 'success' => false,
-                'message' => 'Affiliate not found'
+                'message' => 'Affiliate not found',
             ], 404);
         }
 
-        // Anti-spam: bloqueo por 5 segundos por fingerprint+affiliate
+        // Anti-spam
         $fp = $request->fingerprint ?? Str::uuid()->toString();
         $cacheKey = "click-limit:{$affiliate->id}:{$fp}";
 
         if (Cache::has($cacheKey)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Rate limited'
+                'message' => 'Rate limited',
             ], 429);
         }
 
         Cache::put($cacheKey, true, now()->addSeconds(5));
 
-        // Opcional: anonimizar IP (GDPR friendly)
+        // Anonimizar IP
         $ip = $request->ip() ?? $request->header('CF-Connecting-IP');
         $ipHash = hash('sha256', $ip . env('APP_KEY'));
 
@@ -81,7 +82,7 @@ class TrackingController extends Controller
             'product_id'   => $request->product_id,
             'campaign_id'  => $request->campaign_id,
             'referrer'     => $request->referrer,
-            'ip'           => $ipHash,         // hashed
+            'ip'           => $ipHash,
             'ua'           => $request->userAgent(),
             'fingerprint'  => $fp,
             'utm_source'   => $request->utm_source,
@@ -90,7 +91,7 @@ class TrackingController extends Controller
             'country'      => $request->country,
             'city'         => $request->city,
             'landing'      => $request->landing,
-            'source'       => $source,         // web / edge
+            'source'       => $source,
         ]);
 
         return response()->json(['success' => true]);

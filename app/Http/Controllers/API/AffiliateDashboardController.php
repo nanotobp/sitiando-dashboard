@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;
 use App\Services\AffiliateDashboardService;
 use App\Models\Affiliate;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class AffiliateDashboardController extends Controller
 
     public function me(Request $request)
     {
-        // email viene de SupabaseAuth Middleware
+        // email viene del SupabaseAuth Middleware
         $email = $request->user()->email;
 
         $affiliate = Affiliate::where('email', $email)->first();
@@ -26,7 +26,7 @@ class AffiliateDashboardController extends Controller
         if (!$affiliate) {
             return response()->json([
                 'success' => false,
-                'message' => 'Affiliate not found'
+                'message' => 'Affiliate not found',
             ], 404);
         }
 
@@ -34,7 +34,7 @@ class AffiliateDashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $dashboard
+            'data' => $dashboard,
         ]);
     }
 }

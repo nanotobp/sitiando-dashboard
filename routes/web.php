@@ -7,7 +7,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\AffiliateController;
 use App\Http\Controllers\Admin\AffiliatePayoutController;
 use App\Http\Controllers\Admin\AffiliateAnalyticsController;
 use App\Http\Controllers\Admin\AffiliateAnalyticsDetailController;
@@ -17,10 +16,10 @@ use App\Http\Controllers\CartController;
 |--------------------------------------------------------------------------
 | Web Routes — Sitiando Ecommerce PRO
 |--------------------------------------------------------------------------
-| - Todas las rutas de backoffice están en /admin
-| - Todo el admin requiere auth
-| - Se usan bindings correctos para UUID
-| - Se elimina uso de {id} para modelos UUID
+| - Todas las rutas del admin van bajo /admin
+| - Todo requiere auth
+| - Se eliminan por completo los controladores viejos o inexistentes
+| - Se eliminan rutas rotas de AffiliateController (Admin)
 |--------------------------------------------------------------------------
 */
 
@@ -37,10 +36,9 @@ Route::middleware(['auth'])
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-
     /*
     |--------------------------------------------------------------------------
-    | ANALÍTICAS DE AFILIADOS (solo quienes tengan ability adecuado)
+    | ANALÍTICAS DE AFILIADOS
     |--------------------------------------------------------------------------
     */
     Route::middleware(['ability:view_affiliate_performance'])->group(function () {
@@ -49,16 +47,14 @@ Route::middleware(['auth'])
             [AffiliateAnalyticsController::class, 'index']
         )->name('analytics.affiliates');
 
-        // ← Si el afiliado usa UUID, acá sí debemos usar {id} porque NO es User
         Route::get('/analytics/affiliates/{id}',
             [AffiliateAnalyticsDetailController::class, 'show']
         )->name('analytics.affiliates.show');
     });
 
-
     /*
     |--------------------------------------------------------------------------
-    | USUARIOS DEL SISTEMA (ADMIN ONLY) — UUID SAFE
+    | USUARIOS DEL SISTEMA (ADMIN ONLY)
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->group(function () {
@@ -66,7 +62,6 @@ Route::middleware(['auth'])
         Route::get('/users', [UserController::class, 'index'])
             ->name('users.index');
 
-        // UUID binding correcto
         Route::get('/users/{user}', [UserController::class, 'show'])
             ->name('users.show');
 
@@ -80,10 +75,9 @@ Route::middleware(['auth'])
             ->name('users.permissions');
     });
 
-
     /*
     |--------------------------------------------------------------------------
-    | ROLES & PERMISOS (ACL PRO)
+    | ROLES & PERMISOS
     |--------------------------------------------------------------------------
     */
     Route::middleware(['ability:view_roles'])->group(function () {
@@ -91,7 +85,6 @@ Route::middleware(['auth'])
         Route::get('/roles', [RoleController::class, 'index'])
             ->name('roles.index');
 
-        // Roles no usan UUID, así que {id} es correcto
         Route::get('/roles/{id}', [RoleController::class, 'show'])
             ->name('roles.show');
 
@@ -102,25 +95,9 @@ Route::middleware(['auth'])
             ->name('roles.updateAbilities');
     });
 
-
     /*
     |--------------------------------------------------------------------------
-    | AFILIADOS (EXTERNOS)
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware(['ability:view_affiliates'])->group(function () {
-
-        Route::get('/affiliates', [AffiliateController::class, 'index'])
-            ->name('affiliates.index');
-
-        Route::get('/affiliates/{id}', [AffiliateController::class, 'show'])
-            ->name('affiliates.show');
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LIQUIDACIONES DE COMISIONES (PAYOUTS)
+    | PAYOUTS / LIQUIDACIONES DE COMISIONES
     |--------------------------------------------------------------------------
     */
     Route::middleware(['ability:manage_commissions'])->group(function () {
@@ -143,7 +120,6 @@ Route::middleware(['auth'])
         Route::post('/payouts/{id}/proof', [AffiliatePayoutController::class, 'uploadProof'])
             ->name('payouts.uploadProof');
 
-        // EXPORT CSV
         Route::get('/payouts/{id}/export/csv',
             [AffiliatePayoutController::class, 'exportCsv']
         )->name('payouts.export.csv');
@@ -156,7 +132,7 @@ Route::middleware(['auth'])
 
     /*
     |--------------------------------------------------------------------------
-    | CARRITOS ADMIN (admin + manager)
+    | CARRITOS ADMIN
     |--------------------------------------------------------------------------
     */
     Route::middleware(['roles:admin,manager'])->group(function () {
@@ -168,7 +144,6 @@ Route::middleware(['auth'])
             ->name('carts.show');
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | ÓRDENES / VENTAS
@@ -179,7 +154,6 @@ Route::middleware(['auth'])
         Route::get('/orders', [OrderController::class, 'index'])
             ->name('orders.index');
 
-        // Orders pueden ser integer o UUID → si en tu DB son INT, esto está perfecto
         Route::get('/orders/{order}', [OrderController::class, 'show'])
             ->name('orders.show');
 
@@ -194,10 +168,9 @@ Route::middleware(['auth'])
         )->name('orders.resend-payment-link');
     });
 
-
     /*
     |--------------------------------------------------------------------------
-    | PRODUCTOS CRUD (admin + manager)
+    | PRODUCTOS CRUD
     |--------------------------------------------------------------------------
     */
     Route::middleware(['roles:admin,manager'])->group(function () {
@@ -223,11 +196,9 @@ Route::middleware(['auth'])
 
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
-| CARRITO (Frontend / Usuario logueado)
+| CARRITO FRONTEND (USUARIO LOGUEADO)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -248,7 +219,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('cart.clear');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | CHECKOUT PRO
@@ -265,7 +235,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/success/{id}', [\App\Http\Controllers\CheckoutController::class, 'success'])
         ->name('checkout.success');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -284,16 +253,12 @@ Route::post('/payment/notify', [\App\Http\Controllers\PaymentController::class, 
 Route::get('/payment/cancel', [\App\Http\Controllers\PaymentController::class, 'cancel'])
     ->name('payment.cancel');
 
-
-
 /*
 |--------------------------------------------------------------------------
-| HOME: redirige al dashboard
+| HOME
 |--------------------------------------------------------------------------
 */
 Route::get('/', fn () => redirect()->route('admin.dashboard'));
-
-
 
 /*
 |--------------------------------------------------------------------------

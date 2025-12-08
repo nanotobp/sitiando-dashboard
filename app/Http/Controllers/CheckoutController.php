@@ -7,7 +7,6 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
-use App\Http\Controllers\Controller;
 
 class CheckoutController extends Controller
 {

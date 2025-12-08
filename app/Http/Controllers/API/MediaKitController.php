@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers;
+use App\Http\Controllers\Controller;
 use App\Services\MediaKitService;
 use App\Models\MediaKitAsset;
 
@@ -19,7 +19,7 @@ class MediaKitController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => $this->service->list()
+            'data' => $this->service->list(),
         ]);
     }
 
@@ -31,7 +31,7 @@ class MediaKitController extends Controller
 
         return response()->json([
             'success' => true,
-            'url' => $asset->file_url
+            'url' => $asset->file_url,
         ]);
     }
 }
