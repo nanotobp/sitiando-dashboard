@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "/start-container.sh",
-    "healthcheckPath": "/",
+    "healthcheckPath": "/up",
     "restartPolicyType": "ON_FAILURE"
   }
 }
