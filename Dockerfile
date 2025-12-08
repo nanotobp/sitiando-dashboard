@@ -17,6 +17,9 @@ RUN apk add --no-cache \
 RUN docker-php-ext-configure gd --with-jpeg --with-webp --with-avif \
     && docker-php-ext-install -j$(nproc) \
        pdo_mysql pdo_pgsql zip gd mbstring exif bcmath intl opcache
+# Copiar configuración de PHP-FPM
+COPY php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY php-fpm.d /usr/local/etc/php-fpm.d
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -39,6 +42,12 @@ COPY . .
 # Permisos
 RUN chown -R www-data:www-data /var/www/html
 
+# Ajustar PHP-FPM para escuchar en puerto 9000
+RUN sed -i 's|listen = /var/run/php-fpm.sock|listen = 9000|' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i 's|;listen.allowed_clients = 127.0.0.1|listen.allowed_clients = 127.0.0.1|' /usr/local/etc/php-fpm.d/www.conf
+
+# Exponer Nginx
 EXPOSE 8080
 
 CMD ["/start-container.sh"]
+
