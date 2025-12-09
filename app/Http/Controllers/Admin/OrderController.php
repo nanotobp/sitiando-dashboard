@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderPayment;
 use App\Models\OrderStatusHistory;
@@ -18,14 +19,14 @@ class OrderController extends Controller
             ->with(['latestPayment'])
             ->orderByDesc('created_at');
 
-        // Filtros opcionales (si añadimos más adelante)
+        // Filtros opcionales
         if ($request->status) {
             $query->where('status', $request->status);
         }
 
         $orders = $query->paginate(15);
 
-        return view('orders.index', compact('orders'));
+        return view('admin.orders.index', compact('orders'));
     }
 
     /**
@@ -40,11 +41,11 @@ class OrderController extends Controller
             'latestPayment'
         ])->findOrFail($id);
 
-        return view('orders.show', compact('order'));
+        return view('admin.orders.show', compact('order'));
     }
 
     /**
-     * ACTUALIZAR ESTATUS
+     * ACTUALIZAR STATUS
      */
     public function updateStatus(Request $request, $id)
     {
@@ -61,7 +62,7 @@ class OrderController extends Controller
             $order->status = $new;
             $order->save();
 
-            // Registrar historial
+            // registrar historial
             OrderStatusHistory::create([
                 'order_id'   => $order->id,
                 'old_status' => $old,
