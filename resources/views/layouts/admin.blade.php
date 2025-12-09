@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: var(--sidebar-width);
             background: radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%);
@@ -128,7 +127,6 @@
             color: #6b7280;
         }
 
-        /* MAIN AREA */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -148,83 +146,8 @@
             z-index: 10;
         }
 
-        .topbar-title {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #9ca3af;
-        }
-
-        .topbar-title span {
-            color: #e5e7eb;
-            font-weight: 600;
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: .65rem;
-        }
-
-        .badge-env {
-            font-size: 0.7rem;
-            padding: .25rem .6rem;
-            border-radius: 999px;
-            border: 1px solid rgba(52, 211, 153, 0.4);
-            color: #6ee7b7;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-        }
-
-        .btn-ghost {
-            border-radius: 999px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
-            background: rgba(15, 23, 42, 0.7);
-            color: #e5e7eb;
-            padding: .35rem .8rem;
-            font-size: 0.8rem;
-        }
-
-        .btn-ghost:hover {
-            background: rgba(31, 41, 55, 0.9);
-        }
-
-        .theme-toggle {
-            cursor: pointer;
-            font-size: 1.1rem;
-            line-height: 1;
-        }
-
         .main-content {
             padding: 1.5rem;
-        }
-
-        /* Cards tweak */
-        .card {
-            background: radial-gradient(circle at top left, #020617 0, #020617 45%, #020617 100%);
-            border-radius: 1.1rem;
-            border: 1px solid rgba(31, 41, 55, 0.9);
-            color: #e5e7eb;
-        }
-
-        .card-header {
-            border-bottom-color: rgba(31, 41, 55, 0.9);
-        }
-
-        .card-body {
-            font-size: 0.9rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .sidebar {
-                display: none;
-            }
-            .layout-wrapper {
-                flex-direction: column;
-            }
-            .main-wrapper {
-                width: 100%;
-            }
         }
     </style>
 
@@ -236,10 +159,9 @@
 
     {{-- SIDEBAR ENTERPRISE --}}
     <aside class="sidebar d-none d-lg-block">
+
         <div class="sidebar-brand">
-            <div class="sidebar-logo">
-                S
-            </div>
+            <div class="sidebar-logo">S</div>
             <div>
                 <div class="sidebar-title">SITIANDO PRO</div>
                 <div class="sidebar-subtitle">Ecommerce Admin Suite</div>
@@ -283,26 +205,29 @@
         </ul>
 
         <div class="sidebar-section-title">Afiliados</div>
+
+        {{-- 
+            🔥 BLOQUE ORIGINAL (DESHABILITADO TEMPORALMENTE POR RUTAS INEXISTENTES)
+
+            <ul class="nav-sidebar">
+                <li>
+                    <a href="{{ route('admin.affiliates.index') }}">...</a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.analytics.affiliates') }}">...</a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.payouts.index') }}">...</a>
+                </li>
+            </ul>
+        --}}
+
+        {{-- 🔧 BLOQUE NUEVO, SEGURO, SIN RUTAS ROTAS --}}
         <ul class="nav-sidebar">
             <li>
-                <a href="{{ route('admin.affiliates.index') }}"
-                   class="{{ request()->routeIs('admin.affiliates.*') ? 'active' : '' }}">
+                <a href="#" class="disabled">
                     <span class="nav-icon">🤝</span>
-                    <span>Afiliados</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.analytics.affiliates') }}"
-                   class="{{ request()->routeIs('admin.analytics.affiliates*') ? 'active' : '' }}">
-                    <span class="nav-icon">📈</span>
-                    <span>Analytics Afiliados</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.payouts.index') }}"
-                   class="{{ request()->routeIs('admin.payouts.*') ? 'active' : '' }}">
-                    <span class="nav-icon">💸</span>
-                    <span>Liquidaciones</span>
+                    <span>Afiliados (Próximamente)</span>
                 </a>
             </li>
         </ul>
@@ -334,7 +259,6 @@
     {{-- MAIN WRAPPER --}}
     <div class="main-wrapper">
 
-        {{-- TOPBAR --}}
         <header class="topbar">
             <div class="topbar-title">
                 Panel <span>@yield('title', 'Dashboard')</span>
@@ -343,22 +267,19 @@
             <div class="topbar-actions">
                 <span class="badge-env">PROD</span>
 
-                <button class="btn btn-ghost btn-sm" type="button" onclick="location.href='{{ route('admin.orders.index') }}'">
+                <button class="btn btn-ghost btn-sm" onclick="location.href='{{ route('admin.orders.index') }}'">
                     Ver órdenes
                 </button>
 
                 <form action="/logout" method="POST" class="d-inline">
                     @csrf
-                    <button class="btn btn-ghost btn-sm" type="submit">
-                        Cerrar sesión
-                    </button>
+                    <button class="btn btn-ghost btn-sm">Cerrar sesión</button>
                 </form>
 
-                <span class="theme-toggle" id="themeToggle" title="Toggle theme">◐</span>
+                <span class="theme-toggle" id="themeToggle">◐</span>
             </div>
         </header>
 
-        {{-- MAIN CONTENT --}}
         <main class="main-content">
             @yield('content')
         </main>
@@ -366,15 +287,12 @@
 
 </div>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Mini dark/light toggle (por ahora solo body class toggle si querés luego expandimos)
-    document.getElementById('themeToggle')?.addEventListener('click', () => {
-        document.body.classList.toggle('theme-light');
-    });
+document.getElementById('themeToggle')?.addEventListener('click', () => {
+    document.body.classList.toggle('theme-light');
+});
 </script>
 
 @yield('scripts')

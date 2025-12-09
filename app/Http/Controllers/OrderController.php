@@ -6,71 +6,72 @@ use App\Models\Order;
 use App\Models\OrderPayment;
 use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    /**
+     * LISTADO DE ÓRDENES (Admin / Manager / Seller)
+     */
     public function index(Request $request)
     {
-        $query = Order::query()->with('latestPayment');
+        $query = Order::query()
+            ->with(['latestPayment'])
+            ->orderByDesc('created_at');
 
-        // Filtros básicos
-        if ($request->filled('status')) {
+        // Filtros opcionales (si añadimos más adelante)
+        if ($request->status) {
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('from')) {
-            $query->whereDate('created_at', '>=', $request->from);
-        }
-
-        if ($request->filled('to')) {
-            $query->whereDate('created_at', '<=', $request->to);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'ILIKE', '%' . $search . '%')
-                  ->orWhere('customer_name', 'ILIKE', '%' . $search . '%')
-                  ->orWhere('customer_email', 'ILIKE', '%' . $search . '%');
-            });
-        }
-
-        $orders = $query
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        $orders = $query->paginate(15);
 
         return view('orders.index', compact('orders'));
     }
 
+    /**
+     * DETALLE DE LA ORDEN
+     */
     public function show($id)
     {
-        $order = Order::with(['items.product', 'payments', 'statusHistory'])
-            ->findOrFail($id);
+        $order = Order::with([
+            'items.product',
+            'payments',
+            'statusHistory',
+            'latestPayment'
+        ])->findOrFail($id);
 
         return view('orders.show', compact('order'));
     }
 
+    /**
+     * ACTUALIZAR ESTATUS
+     */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string'
+            'status' => 'required|string',
         ]);
 
         $order = Order::findOrFail($id);
 
-        DB::transaction(function () use ($order, $request) {
-            $order->update([
-                'status' => $request->status
-            ]);
+        $old = $order->status;
+        $new = $request->status;
 
+        if ($old !== $new) {
+            $order->status = $new;
+            $order->save();
+
+            // Registrar historial
             OrderStatusHistory::create([
-                'order_id' => $order->id,
-                'status' => $request->status,
-                'comment' => $request->comment
+                'order_id'   => $order->id,
+                'old_status' => $old,
+                'new_status' => $new,
+                'changed_by' => auth()->id(),
             ]);
-        });
+        }
 
-        return back()->with('success', 'Estado actualizado correctamente.');
+        return redirect()
+            ->route('admin.orders.show', $order->id)
+            ->with('success', 'Estado actualizado correctamente.');
     }
 }

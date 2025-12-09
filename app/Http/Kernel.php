@@ -45,23 +45,24 @@ class Kernel extends HttpKernel
      * ROUTE MIDDLEWARE
      */
     protected $routeMiddleware = [
-        'auth'             => \App\Http\Middleware\Authenticate::class,
-        'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can'              => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-        'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
-        'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+    'auth'             => \App\Http\Middleware\Authenticate::class,
+    'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+    'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+    'can'              => \Illuminate\Auth\Middleware\Authorize::class,
+    'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
+    'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+    'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
+    'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+    'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // 🔐 Middleware de Supabase
-        'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
+    // 🔐 Supabase
+    'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
 
-        // 🔐 Roles
-        'role'             => \App\Http\Middleware\RoleMiddleware::class,
-        'roles'            => \App\Http\Middleware\RolesMiddleware::class,
-    ];
+    // 🔐 Roles correctos (único middleware)
+    'roles'            => \App\Http\Middleware\RolesMiddleware::class,
+];
+
+
 
     /**
      * CRON TASKS — Scheduler

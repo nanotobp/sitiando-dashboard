@@ -4,8 +4,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/start-container.sh",
-    "healthcheckPath": "/up",
+    "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
   }
 }

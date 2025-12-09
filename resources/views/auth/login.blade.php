@@ -7,7 +7,8 @@
 
 <h2>Ingresar</h2>
 
-<form action="{{ route('login.process') }}" method="POST">
+<form action="{{ route('login.submit') }}" method="POST">
+
     @csrf
 
     <label>Email</label>

@@ -1,53 +1,52 @@
-FROM php:8.4-fpm-alpine
+# ===============================
+# PHP-FPM (8.2) + NGINX (Alpine)
+# ===============================
+FROM php:8.2-fpm-alpine AS php
 
-# Dependencias del sistema
+# Dependencias
 RUN apk add --no-cache \
     nginx \
     git \
     curl \
     zip unzip \
+    freetype-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
     libzip-dev \
-    libpng-dev libjpeg-turbo-dev libwebp-dev libavif-dev \
-    libpq-dev \
+    icu-dev \
+    postgresql-dev \
     oniguruma-dev \
-    libxml2-dev \
-    autoconf g++ make
+    libxml2-dev
 
 # Extensiones PHP
-RUN docker-php-ext-configure gd --with-jpeg --with-webp --with-avif \
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp \
     && docker-php-ext-install -j$(nproc) \
-       pdo_mysql pdo_pgsql zip gd mbstring exif bcmath intl opcache
-# Copiar configuración de PHP-FPM
-COPY php-fpm.conf /usr/local/etc/php-fpm.conf
-COPY php-fpm.d /usr/local/etc/php-fpm.d
+        pdo_mysql pdo_pgsql zip gd mbstring intl bcmath exif dom
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# App directory
 WORKDIR /var/www/html
 
-# Copiar configs
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY start-container.sh /start-container.sh
-RUN chmod +x /start-container.sh
-
-# Copiar composer
+# Composer first
 COPY composer.json composer.lock ./
-
 RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-# Copiar app completa
+# Copy full project
 COPY . .
 
-# Permisos
-RUN chown -R www-data:www-data /var/www/html
+# Permisos Laravel
+RUN chown -R nginx:nginx /var/www/html \
+    && chmod -R 755 storage bootstrap/cache
 
-# Ajustar PHP-FPM para escuchar en puerto 9000
-RUN sed -i 's|listen = /var/run/php-fpm.sock|listen = 9000|' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's|;listen.allowed_clients = 127.0.0.1|listen.allowed_clients = 127.0.0.1|' /usr/local/etc/php-fpm.d/www.conf
+# NGINX CONFIG
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Exponer Nginx
-EXPOSE 8080
-
-CMD ["/start-container.sh"]
-
+# START SCRIPT
+COPY start.sh /start.sh
+RUN chmod +x /st

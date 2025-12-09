@@ -15,20 +15,16 @@ class Order extends Model
         'user_id',
         'order_number',
 
-        // Datos del cliente
         'customer_name',
         'customer_email',
         'customer_phone',
 
-        // Totales
         'subtotal',
         'discount',
         'total',
 
-        // Estado
         'status',
 
-        // Pago
         'payment_method',
         'payment_reference',
         'paid_at',
@@ -42,7 +38,7 @@ class Order extends Model
     ];
 
     /* ==========================================================
-       RELACIONES (AFILIADOS Y TRACKING)
+       RELACIONES (AFILIADOS)
     ========================================================== */
 
     public function commissions()
@@ -56,59 +52,55 @@ class Order extends Model
     }
 
     /* ==========================================================
-       RELACIONES ECOMMERCE PRO
+       ECOMMERCE PRO
     ========================================================== */
 
-    // Items de la orden (producto + cantidad + precio)
+    // Items
     public function items()
     {
         return $this->hasMany(OrderItem::class, 'order_id');
     }
 
-    // Pagos (Bancard u otros)
+    // P A G O S  (compatibles con UUID)
     public function payments()
     {
-        return $this->hasMany(OrderPayment::class, 'order_id');
+        return $this->hasMany(OrderPayment::class, 'order_id')
+                    ->orderBy('created_at', 'desc'); // FIX
     }
 
-    // Último pago registrado
+    // Último pago REAL
     public function latestPayment()
     {
-        return $this->hasOne(OrderPayment::class, 'order_id')->latestOfMany();
+        return $this->hasOne(OrderPayment::class, 'order_id')
+                    ->latest('created_at'); // FIX total
     }
 
-    // Historial de estado de la orden
+    // Historial de estado ordenado
     public function statusHistory()
     {
         return $this->hasMany(OrderStatusHistory::class, 'order_id')
                     ->orderBy('created_at', 'asc');
     }
 
-    // Último estado registrado
+    // Último estado REAL
     public function lastStatus()
     {
-        return $this->hasOne(OrderStatusHistory::class, 'order_id')->latestOfMany();
+        return $this->hasOne(OrderStatusHistory::class, 'order_id')
+                    ->latest('created_at'); // FIX total
     }
 
     /* ==========================================================
-       MÉTODOS ECOMMERCE: addItem, recalculateTotals, etc.
+       MÉTODOS
     ========================================================== */
 
-    /**
-     * Agrega un item a la orden de manera segura y recalcula totales.
-     * $product puede ser un modelo Product o un ID.
-     */
     public function addItem($product, int $qty = 1)
     {
-        // Si pasan ID, buscamos el modelo
         if (is_numeric($product)) {
             $product = \App\Models\Product::findOrFail($product);
         }
 
-        // Precio del producto
         $price = $product->precio;
 
-        // Crear ítem
         $item = $this->items()->create([
             'product_id' => $product->id,
             'qty'        => $qty,
@@ -116,15 +108,11 @@ class Order extends Model
             'total'      => $price * $qty,
         ]);
 
-        // Recalcular totales de la orden
         $this->recalculateTotals();
 
         return $item;
     }
 
-    /**
-     * Actualiza la cantidad de un item existente.
-     */
     public function updateItem(string $itemId, int $qty)
     {
         $item = $this->items()->findOrFail($itemId);
@@ -134,13 +122,9 @@ class Order extends Model
         $item->save();
 
         $this->recalculateTotals();
-
         return $item;
     }
 
-    /**
-     * Elimina un item de la orden.
-     */
     public function removeItem(string $itemId)
     {
         $item = $this->items()->findOrFail($itemId);
@@ -149,9 +133,6 @@ class Order extends Model
         $this->recalculateTotals();
     }
 
-    /**
-     * Recalcula subtotal, descuentos y total final.
-     */
     public function recalculateTotals()
     {
         $subtotal = $this->items()->sum('total');

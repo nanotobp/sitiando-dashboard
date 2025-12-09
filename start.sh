@@ -2,10 +2,7 @@
 set -e
 
 echo "Starting PHP-FPM..."
-php-fpm -y /usr/local/etc/php-fpm.conf -R &
-
-# Esperar a que FPM levante
-sleep 2
+php-fpm -D
 
 echo "Starting Nginx..."
 exec nginx -g "daemon off;"
