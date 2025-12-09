@@ -12,11 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Aquí puedes agregar middlewares globales o grupos personalizados
-        // ej: $middleware->append(\App\Http\Middleware\MyMiddleware::class);
+        // 👉 MIDDLEWARES DE RUTA PERSONALIZADOS
+        $middleware->alias([
+            'roles' => \App\Http\Middleware\RolesMiddleware::class,
+            'supabase.auth' => \App\Http\Middleware\SupabaseAuth::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Manejo global de excepciones
-        // ej: $exceptions->render(function(Exception $e, $request) { ... });
+        //
     })
     ->create();

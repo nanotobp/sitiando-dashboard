@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    /**
+     * Lista de productos
+     */
     public function index()
     {
         $products = Product::orderBy('name')->paginate(20);
@@ -16,11 +20,17 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Formulario de creación
+     */
     public function create()
     {
         return view('admin.products.create');
     }
 
+    /**
+     * Guardar nuevo producto
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -37,11 +47,17 @@ class ProductController extends Controller
             ->with('success', 'Producto creado correctamente.');
     }
 
+    /**
+     * Editar producto
+     */
     public function edit(Product $product)
     {
         return view('admin.products.edit', compact('product'));
     }
 
+    /**
+     * Actualizar producto
+     */
     public function update(Request $request, Product $product)
     {
         $data = $request->validate([
@@ -58,6 +74,9 @@ class ProductController extends Controller
             ->with('success', 'Producto actualizado correctamente.');
     }
 
+    /**
+     * Eliminar producto
+     */
     public function destroy(Product $product)
     {
         $product->delete();

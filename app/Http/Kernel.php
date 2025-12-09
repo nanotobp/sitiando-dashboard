@@ -55,12 +55,13 @@ class Kernel extends HttpKernel
     'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
     'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-    // 🔐 Supabase
+    // Supabase
     'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
 
-    // 🔐 Roles correctos (único middleware)
-    'roles'            => \App\Http\Middleware\RolesMiddleware::class,
+    // Roles (único middleware válido)
+    'roles' => \App\Http\Middleware\RolesMiddleware::class,
 ];
+
 
 
 

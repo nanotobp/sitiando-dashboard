@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class RolesMiddleware
 {
+    /**
+     * Middleware para validar múltiples roles.
+     * Uso: ->middleware("roles:admin,manager")
+     */
     public function handle(Request $request, Closure $next, ...$roles)
     {
         $user = auth()->user();
@@ -15,8 +19,9 @@ class RolesMiddleware
             abort(403, 'Usuario no autenticado.');
         }
 
+        // Si el usuario tiene al menos 1 de los roles permitidos → OK
         foreach ($roles as $role) {
-            if ($user->hasRole($role)) {
+            if ($user->roles->contains('name', $role)) {
                 return $next($request);
             }
         }

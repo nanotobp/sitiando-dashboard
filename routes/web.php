@@ -58,23 +58,20 @@ Route::middleware(['auth'])
         Route::get('/carts', [\App\Http\Controllers\Admin\CartController::class, 'index'])
             ->name('carts.index');
 
-       /* ÓRDENES */
+    
         /* ÓRDENES */
-Route::middleware('roles:admin,manager,seller')->group(function () {
+Route::middleware(['roles:admin,manager,seller'])->group(function () {
 
-
-    // LISTADO
     Route::get('/orders', [OrderController::class, 'index'])
         ->name('orders.index');
 
-    // DETALLE
     Route::get('/orders/{order}', [OrderController::class, 'show'])
         ->name('orders.show');
 
-    // ACTUALIZAR ESTADO
     Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])
         ->name('orders.update-status');
 });
+
 
         /* PRODUCTOS */
         Route::get('/products', [ProductController::class, 'index'])
