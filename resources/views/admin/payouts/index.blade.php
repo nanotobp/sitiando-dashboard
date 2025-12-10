@@ -23,7 +23,7 @@
         </thead>
 
         <tbody>
-            @foreach ($payouts as $p)
+            @forelse ($payouts as $p)
                 <tr>
                     <td>{{ $p->affiliate?->full_name }}</td>
                     <td>{{ $p->period_start }} → {{ $p->period_end }}</td>
@@ -40,7 +40,13 @@
                         </a>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center">
+                        No hay liquidaciones generadas aún.
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
 
     </table>
@@ -48,7 +54,6 @@
     <div style="margin-top:20px;">
         {{ $payouts->links() }}
     </div>
-
 </div>
 
 @endsection

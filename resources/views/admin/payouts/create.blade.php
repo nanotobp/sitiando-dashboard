@@ -26,12 +26,12 @@
 
                 <div>
                     <label class="filter-label">Desde</label>
-                    <input type="date" name="period_start" class="form-control">
+                    <input type="date" name="period_start" class="form-control" required>
                 </div>
 
                 <div>
                     <label class="filter-label">Hasta</label>
-                    <input type="date" name="period_end" class="form-control">
+                    <input type="date" name="period_end" class="form-control" required>
                 </div>
 
             </div>

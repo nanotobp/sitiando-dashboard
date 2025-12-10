@@ -2,16 +2,20 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserController;
+/*
+|--------------------------------------------------------------------------
+| IMPORTS — ADMIN CONTROLLERS
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AffiliatePayoutController;
 use App\Http\Controllers\Admin\AffiliateAnalyticsController;
 use App\Http\Controllers\Admin\AffiliateAnalyticsDetailController;
-use App\Http\Controllers\CartController;
-
+use App\Http\Controllers\Admin\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,13 +32,11 @@ Route::middleware(['auth'])
             ->name('dashboard');
 
         /* ANALYTICS AFILIADOS */
-        Route::get('/analytics/affiliates',
-            [AffiliateAnalyticsController::class, 'index']
-        )->name('analytics.affiliates');
+        Route::get('/analytics/affiliates', [AffiliateAnalyticsController::class, 'index'])
+            ->name('analytics.affiliates');
 
-        Route::get('/analytics/affiliates/{id}',
-            [AffiliateAnalyticsDetailController::class, 'show']
-        )->name('analytics.affiliates.show');
+        Route::get('/analytics/affiliates/{id}', [AffiliateAnalyticsDetailController::class, 'show'])
+            ->name('analytics.affiliates.show');
 
         /* USUARIOS */
         Route::get('/users', [UserController::class, 'index'])
@@ -50,35 +52,44 @@ Route::middleware(['auth'])
         Route::get('/roles/{id}', [RoleController::class, 'show'])
             ->name('roles.show');
 
-        /* PAYOUTS */
-        Route::get('/payouts', [AffiliatePayoutController::class, 'index'])
-            ->name('payouts.index');
+        /* PAYOUTS — SOLO admin/superadmin */
+        Route::middleware(['role:admin,superadmin'])->group(function () {
+
+            Route::get('/payouts', [AffiliatePayoutController::class, 'index'])
+                ->name('payouts.index');
+
+            Route::get('/payouts/create', [AffiliatePayoutController::class, 'create'])
+                ->name('payouts.create');
+
+            Route::get('/payouts/{id}', [AffiliatePayoutController::class, 'show'])
+                ->name('payouts.show');
+        });
 
         /* CARRITOS */
-        Route::get('/carts', [\App\Http\Controllers\Admin\CartController::class, 'index'])
+        Route::get('/carts', [CartController::class, 'index'])
             ->name('carts.index');
 
-    
-        /* ÓRDENES */
-Route::middleware(['roles:admin,manager,seller'])->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | ÓRDENES (Admin / Manager / Seller)
+        |--------------------------------------------------------------------------
+        */
+        Route::middleware(['roles:admin,manager,seller'])->group(function () {
 
-    Route::get('/orders', [OrderController::class, 'index'])
-        ->name('orders.index');
+            Route::get('/orders', [OrderController::class, 'index'])
+                ->name('orders.index');
 
-    Route::get('/orders/{order}', [OrderController::class, 'show'])
-        ->name('orders.show');
+            Route::get('/orders/{order}', [OrderController::class, 'show'])
+                ->name('orders.show');
 
-    Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])
-        ->name('orders.update-status');
-});
-
+            Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+                ->name('orders.update-status');
+        });
 
         /* PRODUCTOS */
         Route::get('/products', [ProductController::class, 'index'])
             ->name('products.index');
-
     });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -86,11 +97,9 @@ Route::middleware(['roles:admin,manager,seller'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/cart', [CartController::class, 'index'])
+    Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])
         ->name('cart.index');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -100,7 +109,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
-
 
 /*
 |--------------------------------------------------------------------------

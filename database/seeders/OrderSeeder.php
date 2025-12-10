@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\OrderPayment;
-use App\Models\OrderStatusHistory;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str; // <--- IMPORTANTE
 
 class OrderSeeder extends Seeder
 {
@@ -15,67 +13,37 @@ class OrderSeeder extends Seeder
     {
         $user = User::first();
 
-        if (!$user) {
-            $this->command->error("⚠ No hay usuarios. Creá uno antes de correr el seeder.");
-            return;
-        }
-
         for ($i = 1; $i <= 10; $i++) {
+            Order::create([
+                'id' => Str::uuid(),
+                'order_number' => 'ORD-' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'customer_id' => $user->id,
 
-            // ========= GENERAR NÚMERO DE ORDEN ÚNICO =========
-            $orderNumber = 'ORD-' . str_pad(Order::count() + 1, 4, '0', STR_PAD_LEFT);
+                // Campos reales según estructura de tu tabla:
+                'customer_email' => "cliente{$i}@test.com",
+                'customer_phone' => "09918801{$i}",
 
-            // ========= CREAR ORDEN =========
-            $order = Order::create([
-                'user_id'        => $user->id,
-                'order_number'   => $orderNumber,
-                'customer_name'  => "Cliente $i",
-                'customer_email' => "cliente$i@test.com",
-                'customer_phone' => '0991' . rand(100000, 999999),
-                'subtotal'       => 0,
-                'discount'       => 0,
-                'total'          => 0,
-                'status'         => 'pending',
-            ]);
+                'shipping_address' => [
+                    'full_name' => "Cliente {$i}",
+                    'address_line_1' => "Calle Falsa {$i}",
+                    'city' => "Asunción",
+                    'country' => "PY",
+                ],
 
-            // ========= CREAR ITEMS =========
-            for ($j = 1; $j <= 3; $j++) {
-                $price = rand(20000, 120000);
-                $qty   = rand(1, 3);
+                'billing_address' => [
+                    'full_name' => "Cliente {$i}",
+                    'ruc' => "1234567-{$i}",
+                    'address' => "Barrio Centro",
+                ],
 
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'product_id' => 1, // cambiar si tenés productos
-                    'qty'        => $qty,
-                    'price'      => $price,
-                    'total'      => $price * $qty,
-                ]);
-            }
+                'subtotal' => 0,
+                'discount_amount' => 0,
+                'tax_amount' => 0,
+                'shipping_amount' => 0,
+                'total' => 0,
 
-            // ========= ACTUALIZAR TOTALES =========
-            $order->update([
-                'subtotal' => $order->items()->sum('total'),
-                'total'    => $order->items()->sum('total'),
-            ]);
-
-            // ========= CREAR PAGO =========
-            OrderPayment::create([
-                'order_id'        => $order->id,
-                'status'          => 'pending',
-                'amount'          => $order->total,
-                'payment_method'  => 'bancard',
-                'transaction_id'  => 'TX-' . uniqid(),
-            ]);
-
-            // ========= HISTORIAL DE ESTADO =========
-            OrderStatusHistory::create([
-                'order_id'   => $order->id,
-                'status'     => 'pending',
-                'notes'      => 'Orden creada automáticamente',
-                'changed_by' => $user->id,
+                'status' => 'pending',
             ]);
         }
-
-        $this->command->info("✔ Seeder ejecutado con éxito sin errores 🎉");
     }
 }

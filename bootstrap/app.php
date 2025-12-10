@@ -12,9 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // 👉 MIDDLEWARES DE RUTA PERSONALIZADOS
+
+        // 👉 REGISTRO CORRECTO DE ALIAS
         $middleware->alias([
-            'roles' => \App\Http\Middleware\RolesMiddleware::class,
+            'roles' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'  => \App\Http\Middleware\RoleMiddleware::class,
             'supabase.auth' => \App\Http\Middleware\SupabaseAuth::class,
         ]);
     })

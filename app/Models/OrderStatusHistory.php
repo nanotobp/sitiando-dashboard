@@ -11,69 +11,61 @@ class OrderStatusHistory extends Model
 
     protected $table = 'order_status_history';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'order_id',
-        'status',
-        'notes',
-        'changed_by', // opcional: usuario admin/operador
+        'old_status',
+        'new_status',
+        'changed_by',
+        'changed_at',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
+        'changed_at' => 'datetime',
     ];
 
     /* ==========================================================
        RELACIONES
     ========================================================== */
 
-    // La orden cuyos cambios se registran
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
-    // Usuario que realizó el cambio (si corresponde)
     public function user()
     {
         return $this->belongsTo(User::class, 'changed_by');
     }
 
-
     /* ==========================================================
-       MÉTODOS ÚTILES
+       MÉTODO CENTRAL PARA REGISTRAR CAMBIOS
     ========================================================== */
 
-    /**
-     * Crear una entrada en el historial y actualizar la orden.
-     * Esto se usa en controladores y servicios.
-     */
-    public static function recordStatus(Order $order, string $newStatus, string $notes = null, $userId = null)
+    public static function record(Order $order, string $newStatus, ?string $userId = null)
     {
-        // 1) Registrar historial
-        $record = self::create([
+        return self::create([
             'order_id'   => $order->id,
-            'status'     => $newStatus,
-            'notes'      => $notes,
+            'old_status' => $order->status,
+            'new_status' => $newStatus,
             'changed_by' => $userId,
+            'changed_at' => now(),
         ]);
-
-        // 2) Actualizar orden
-        $order->status = $newStatus;
-        $order->save();
-
-        return $record;
     }
 
-    /**
-     * Devuelve un texto resumen amigable
-     */
+    /* ==========================================================
+       TEXTO RESUMIDO
+    ========================================================== */
+
     public function formatted()
     {
         return sprintf(
-            "[%s] %s — %s",
-            $this->created_at->format('d/m/Y H:i'),
-            strtoupper($this->status),
-            $this->notes ?? 'Sin notas'
+            "[%s] %s → %s",
+            $this->changed_at->format('d/m/Y H:i'),
+            strtoupper($this->old_status ?? '-'),
+            strtoupper($this->new_status ?? '-'),
         );
     }
 }

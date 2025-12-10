@@ -35,4 +35,41 @@ class Role extends Model
             'ability_id'
         );
     }
+
+    /**
+     * Verifica si el rol coincide con un nombre (reemplazo de is())
+     * Debe evitar conflicto con Model::is()
+     */
+    public function isRole(string $roleName): bool
+    {
+        return $this->name === $roleName;
+    }
+
+    /**
+     * Devuelve un texto bonito del rol
+     */
+    public function label(): string
+    {
+        return ucfirst($this->name);
+    }
+
+    /**
+     * Verifica si el rol tiene una ability por key
+     */
+    public function hasAbility(string $abilityKey): bool
+    {
+        return $this->abilities()
+            ->where('key', $abilityKey)
+            ->exists();
+    }
+
+    /**
+     * Devuelve todas las abilities en array plano
+     */
+    public function abilityKeys(): array
+    {
+        return $this->abilities()
+            ->pluck('key')
+            ->toArray();
+    }
 }

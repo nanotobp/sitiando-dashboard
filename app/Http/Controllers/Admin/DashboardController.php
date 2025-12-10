@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers.Admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
@@ -21,7 +21,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard administrativo PRO.
+     * Muestra el dashboard del admin (Ultra PRO).
      */
     public function index()
     {

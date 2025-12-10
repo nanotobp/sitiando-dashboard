@@ -23,7 +23,7 @@ class CartService
                 'status'  => 'active',
             ],
             [
-                'total'   => 0,
+                'total' => 0,
             ]
         );
     }
@@ -31,32 +31,38 @@ class CartService
     /**
      * Agregar producto al carrito.
      */
-    public function addItem(User $user, int $productId, int $qty = 1): Cart
+    public function addItem(User $user, string $productId, int $qty = 1): Cart
     {
         return DB::transaction(function () use ($user, $productId, $qty) {
 
-            if ($qty < 1) {
-                $qty = 1;
-            }
+            if ($qty < 1) $qty = 1;
 
             $cart = $this->getOrCreateCartForUser($user);
 
             $product = Product::where('activo', true)->findOrFail($productId);
 
-            // Validar stock (opcional, pero PRO)
-            if ($product->stock !== null && $product->stock < $qty) {
+            // Validar stock
+            if (!is_null($product->stock) && $product->stock < $qty) {
                 throw ValidationException::withMessages([
                     'qty' => 'No hay stock suficiente para este producto.',
                 ]);
             }
 
-            /** @var CartItem $item */
-            $item = CartItem::firstOrNew([
-                'cart_id'    => $cart->id,
-                'product_id' => $product->id,
-            ]);
+            // Buscar item existente con lock
+            $item = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $product->id)
+                ->lockForUpdate()
+                ->first();
 
-            $item->qty   = $item->exists ? $item->qty + $qty : $qty;
+            if (!$item) {
+                $item = new CartItem();
+                $item->cart_id    = $cart->id;
+                $item->product_id = $product->id;
+                $item->qty        = $qty;
+            } else {
+                $item->qty += $qty;
+            }
+
             $item->price = $product->precio;
             $item->total = $item->qty * $item->price;
             $item->save();
@@ -75,22 +81,21 @@ class CartService
     /**
      * Actualizar cantidad de un item.
      */
-    public function updateItemQuantity(User $user, int $itemId, int $qty): Cart
+    public function updateItemQuantity(User $user, string $itemId, int $qty): Cart
     {
         return DB::transaction(function () use ($user, $itemId, $qty) {
 
             $cart = $this->getOrCreateCartForUser($user);
 
-            /** @var CartItem $item */
-            $item = CartItem::where('cart_id', $cart->id)->findOrFail($itemId);
+            $item = CartItem::where('cart_id', $cart->id)
+                ->lockForUpdate()
+                ->findOrFail($itemId);
 
             if ($qty <= 0) {
-                // Si la cantidad es 0 o menos, eliminamos el ítem
                 $productId = $item->product_id;
                 $item->delete();
 
                 $this->recalculateTotals($cart);
-
                 $this->logEvent($cart, 'remove_item', [
                     'product_id' => $productId,
                     'reason'     => 'qty_zero',
@@ -99,11 +104,11 @@ class CartService
                 return $cart->fresh(['items.product']);
             }
 
-            // Validar stock contra el producto
-            $product = Product::findOrFail($item->product_id);
-            if ($product->stock !== null && $product->stock < $qty) {
+            $product = Product::where('activo', true)->findOrFail($item->product_id);
+
+            if (!is_null($product->stock) && $product->stock < $qty) {
                 throw ValidationException::withMessages([
-                    'qty' => 'No hay stock suficiente para este producto.',
+                    'qty' => 'No hay stock suficiente.',
                 ]);
             }
 
@@ -126,14 +131,15 @@ class CartService
     /**
      * Eliminar un ítem del carrito.
      */
-    public function removeItem(User $user, int $itemId): Cart
+    public function removeItem(User $user, string $itemId): Cart
     {
         return DB::transaction(function () use ($user, $itemId) {
 
             $cart = $this->getOrCreateCartForUser($user);
 
-            /** @var CartItem $item */
-            $item = CartItem::where('cart_id', $cart->id)->findOrFail($itemId);
+            $item = CartItem::where('cart_id', $cart->id)
+                ->lockForUpdate()
+                ->findOrFail($itemId);
 
             $productId = $item->product_id;
             $item->delete();
@@ -168,60 +174,31 @@ class CartService
         });
     }
 
-    /**
-     * Marcar el carrito como "completed" (cuando se genera la orden).
-     */
     public function markCompleted(Cart $cart): void
     {
-        $cart->update([
-            'status' => 'completed',
-        ]);
-
+        $cart->update(['status' => 'completed']);
         $this->logEvent($cart, 'completed');
     }
 
-    /**
-     * (Usado por el comando) Marcar carritos inactivos como "abandoned".
-     */
     public function markAbandoned(Cart $cart): void
     {
-        $cart->update([
-            'status' => 'abandoned',
-        ]);
-
+        $cart->update(['status' => 'abandoned']);
         $this->logEvent($cart, 'abandoned');
     }
 
-    /**
-     * Reasignar carrito cuando el usuario se loguea (carrito invitado → usuario).
-     * Por ahora trabajamos solo con carritos por usuario, pero dejamos el hook.
-     */
     public function attachCartToUser(Cart $cart, User $user): void
     {
-        $cart->update([
-            'user_id' => $user->id,
-        ]);
-
-        $this->logEvent($cart, 'attach_user', [
-            'user_id' => $user->id,
-        ]);
+        $cart->update(['user_id' => $user->id]);
+        $this->logEvent($cart, 'attach_user', ['user_id' => $user->id]);
     }
 
-    /**
-     * Recalcular el total del carrito a partir de sus items.
-     */
     private function recalculateTotals(Cart $cart): void
     {
-        $total = $cart->items()->sum('total');
-
         $cart->update([
-            'total' => $total,
+            'total' => $cart->items()->sum('total'),
         ]);
     }
 
-    /**
-     * Registrar un evento en el log de actividad del carrito.
-     */
     private function logEvent(Cart $cart, string $event, array $payload = []): void
     {
         try {
@@ -231,8 +208,7 @@ class CartService
                 'payload' => $payload,
             ]);
         } catch (\Throwable $e) {
-            // No rompemos el flujo de carrito si falla el log
-            \Log::warning('No se pudo registrar activity log del carrito', [
+            \Log::warning('Cart log failed', [
                 'cart_id' => $cart->id,
                 'event'   => $event,
                 'error'   => $e->getMessage(),

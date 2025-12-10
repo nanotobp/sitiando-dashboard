@@ -25,13 +25,12 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
 
-            // 🛒 TRACKING DE CARRITO
+            // Tracking carrito
             \App\Http\Middleware\CartActivityMiddleware::class,
         ],
 
@@ -45,32 +44,28 @@ class Kernel extends HttpKernel
      * ROUTE MIDDLEWARE
      */
     protected $routeMiddleware = [
-    'auth'             => \App\Http\Middleware\Authenticate::class,
-    'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-    'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-    'can'              => \Illuminate\Auth\Middleware\Authorize::class,
-    'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
-    'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-    'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
-    'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-    'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'auth'             => \App\Http\Middleware\Authenticate::class,
+        'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'can'              => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+        'signed'           => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-    // Supabase
-    'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
+        // Supabase
+        'supabase.auth'    => \App\Http\Middleware\SupabaseAuth::class,
 
-    // Roles (único middleware válido)
-    'roles' => \App\Http\Middleware\RolesMiddleware::class,
-];
-
-
-
+        // Roles
+        'role'             => \App\Http\Middleware\RoleMiddleware::class,
+    ];
 
     /**
-     * CRON TASKS — Scheduler
+     * Scheduler
      */
     protected function schedule(Schedule $schedule)
     {
-        // 🛒 Detectar carritos abandonados cada 5 minutos
         $schedule->command('carts:detect-abandoned')->everyFiveMinutes();
     }
 }

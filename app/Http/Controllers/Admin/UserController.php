@@ -13,15 +13,18 @@ class UserController extends Controller
      * Listado de usuarios
      */
     public function index()
-    {
-        $query = User::query()->with('roles')->withCount('orders');
+{
+    $query = User::query()
+        ->with('roles')
+        ->withCount('orders');
 
-        // Otros filtros futuros pueden ir aquí
+    // Para el filtro de roles en la vista
+    $roles = \App\Models\Role::all();
 
-        $users = $query->paginate(20);
+    $users = $query->paginate(20);
 
-        return view('admin.users.index', compact('users'));
-    }
+    return view('admin.users.index', compact('users', 'roles'));
+}
 
     /**
      * Form para editar el rol del usuario

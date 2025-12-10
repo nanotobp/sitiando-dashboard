@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 use App\Models\Role;
+use App\Models\Ability;
 use App\Models\Affiliate;
 use App\Models\Order;
 use App\Models\Cart;
@@ -16,9 +17,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasUuids;
 
-    /**
-     * UUID como clave primaria
-     */
     public $incrementing = false;
     protected $keyType = 'string';
 
@@ -26,10 +24,9 @@ class User extends Authenticatable
         'full_name',
         'email',
         'password',
-        'role',
         'phone',
         'vendor_name',
-        'vendor_code'
+        'vendor_code',
     ];
 
     protected $hidden = [
@@ -45,7 +42,9 @@ class User extends Authenticatable
         ];
     }
 
-    /* RELACIONES */
+    /* ==========================================================
+       RELACIONES
+    ========================================================== */
 
     public function roles()
     {
@@ -59,11 +58,82 @@ class User extends Authenticatable
 
     public function orders()
     {
-        return $this->hasMany(Order::class, 'customer_id');
+        return $this->hasMany(Order::class, 'user_id');
     }
 
     public function carts()
     {
         return $this->hasMany(Cart::class, 'user_id');
+    }
+
+    /* ==========================================================
+       HELPERS
+    ========================================================== */
+
+    public function getNameAttribute()
+    {
+        return $this->full_name ?? $this->email;
+    }
+
+    /* ==========================================================
+       ROLES — Saneados y 100% compatibles
+    ========================================================== */
+
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function hasAnyRole(...$roles): bool
+    {
+        // Acepta array o argumentos separados
+        $roles = is_array($roles[0]) ? $roles[0] : $roles;
+
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /* ==========================================================
+       ABILITIES — Optimizado
+    ========================================================== */
+
+    public function abilities()
+    {
+        return Ability::whereIn('abilities.id',
+            $this->roles()
+                ->with('abilities')
+                ->get()
+                ->pluck('abilities')
+                ->flatten()
+                ->pluck('id')
+        )->get();
+    }
+
+    public function hasAbility(string $key): bool
+    {
+        return $this->abilities()->contains('key', $key);
+    }
+
+    public function canAccess($required)
+    {
+        if ($this->isAdmin()) return true;
+
+        if (is_string($required)) {
+            return $this->hasAbility($required);
+        }
+
+        if (is_array($required)) {
+            foreach ($required as $ability) {
+                if ($this->hasAbility($ability)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

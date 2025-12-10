@@ -3,42 +3,70 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
+
+use App\Models\User;
+use App\Models\OrderItem;
+use App\Models\PaymentTransaction;
+use App\Models\OrderStatusHistory;
+use App\Models\AffiliateCommission;
 
 class Order extends Model
 {
-    use HasUuids;
+    use HasFactory;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $table = 'orders';
 
     protected $fillable = [
-        'user_id',
+        'id',
         'order_number',
 
-        'customer_name',
+        'customer_id',
         'customer_email',
         'customer_phone',
 
+        'shipping_address',
+        'billing_address',
+
         'subtotal',
-        'discount',
+        'discount_amount',
+        'tax_amount',
+        'shipping_amount',
         'total',
 
         'status',
-
-        'payment_method',
-        'payment_reference',
-        'paid_at',
+        'metadata',
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'total'    => 'decimal:2',
-        'paid_at'  => 'datetime',
+        'shipping_address' => 'array',
+        'billing_address'  => 'array',
+        'metadata'         => 'array',
+
+        'subtotal'         => 'decimal:2',
+        'discount_amount'  => 'decimal:2',
+        'tax_amount'       => 'decimal:2',
+        'shipping_amount'  => 'decimal:2',
+        'total'            => 'decimal:2',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
+
     /* ==========================================================
-       RELACIONES (AFILIADOS)
+       RELACIONES
     ========================================================== */
 
     public function commissions()
@@ -46,51 +74,42 @@ class Order extends Model
         return $this->hasMany(AffiliateCommission::class, 'order_id');
     }
 
-    public function click()
+    public function customer()
     {
-        return $this->hasOne(AffiliateClick::class, 'order_id');
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
-    /* ==========================================================
-       ECOMMERCE PRO
-    ========================================================== */
-
-    // Items
     public function items()
     {
         return $this->hasMany(OrderItem::class, 'order_id');
     }
 
-    // P A G O S  (compatibles con UUID)
     public function payments()
     {
-        return $this->hasMany(OrderPayment::class, 'order_id')
-                    ->orderBy('created_at', 'desc'); // FIX
+        return $this->hasMany(PaymentTransaction::class, 'order_id')
+            ->orderBy('created_at', 'desc');
     }
 
-    // Último pago REAL
     public function latestPayment()
     {
-        return $this->hasOne(OrderPayment::class, 'order_id')
-                    ->latest('created_at'); // FIX total
+        return $this->hasOne(PaymentTransaction::class, 'order_id')
+            ->latest('created_at');
     }
 
-    // Historial de estado ordenado
     public function statusHistory()
     {
         return $this->hasMany(OrderStatusHistory::class, 'order_id')
-                    ->orderBy('created_at', 'asc');
+            ->orderBy('created_at', 'asc');
     }
 
-    // Último estado REAL
     public function lastStatus()
     {
         return $this->hasOne(OrderStatusHistory::class, 'order_id')
-                    ->latest('created_at'); // FIX total
+            ->latest('created_at');
     }
 
     /* ==========================================================
-       MÉTODOS
+       MÉTODOS ECOMMERCE
     ========================================================== */
 
     public function addItem($product, int $qty = 1)
@@ -102,10 +121,12 @@ class Order extends Model
         $price = $product->precio;
 
         $item = $this->items()->create([
-            'product_id' => $product->id,
-            'qty'        => $qty,
-            'price'      => $price,
-            'total'      => $price * $qty,
+            'product_id'   => $product->id,
+            'product_name' => $product->name,
+            'sku'          => $product->sku,
+            'quantity'     => $qty,
+            'unit_price'   => $price,
+            'total_price'  => $price * $qty,
         ]);
 
         $this->recalculateTotals();
@@ -117,8 +138,8 @@ class Order extends Model
     {
         $item = $this->items()->findOrFail($itemId);
 
-        $item->qty   = $qty;
-        $item->total = $item->price * $qty;
+        $item->quantity    = $qty;
+        $item->total_price = $item->unit_price * $qty;
         $item->save();
 
         $this->recalculateTotals();
@@ -135,11 +156,11 @@ class Order extends Model
 
     public function recalculateTotals()
     {
-        $subtotal = $this->items()->sum('total');
+        $subtotal = $this->items()->sum('total_price');
 
-        $this->subtotal = $subtotal;
-        $this->discount = $this->discount ?? 0;
-        $this->total    = $subtotal - $this->discount;
+        $this->subtotal        = $subtotal;
+        $this->discount_amount = $this->discount_amount ?? 0;
+        $this->total           = ($subtotal - $this->discount_amount);
 
         $this->save();
     }

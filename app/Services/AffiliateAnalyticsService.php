@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class AffiliateAnalyticsService
 {
     /**
-     * Dashboard general (ADMIN)
+     * Dashboard global (ADMIN)
      */
     public function getGlobalStats(): array
     {
@@ -22,13 +22,23 @@ class AffiliateAnalyticsService
             'active_affiliates'   => Affiliate::where('is_active', true)->count(),
             'total_clicks'        => AffiliateClick::count(),
             'total_conversions'   => AffiliateClick::whereNotNull('converted_at')->count(),
-            'total_sales'         => Order::whereHas('commissions')->sum('total'),
+            'total_sales'         => $this->globalSalesTotal(),
             'total_commissions'   => AffiliateCommission::sum('commission_amount'),
             'pending_payouts'     => AffiliatePayout::where('status', 'pending')->sum('total_amount'),
             'paid_payouts'        => AffiliatePayout::where('status', 'paid')->sum('total_amount'),
             'conversion_rate'     => $this->globalConversionRate(),
         ];
     }
+
+
+    /**
+     * Total de ventas generadas por afiliados
+     */
+    private function globalSalesTotal()
+    {
+        return Order::whereHas('commissions')->sum('total');
+    }
+
 
     /**
      * Tasa de conversión global
@@ -43,31 +53,31 @@ class AffiliateAnalyticsService
             : 0;
     }
 
+
     /**
      * Top afiliados por comisiones
      */
     public function topAffiliatesByCommission(int $limit = 10)
     {
-        return Affiliate::select(
-            'id',
-            'full_name',
-            'total_sales',
-            'total_commission_earned'
-        )
-        ->orderBy('total_commission_earned', 'DESC')
-        ->limit($limit)
-        ->get();
+        return Affiliate::withSum('commissions as commission_total', 'commission_amount')
+            ->orderByDesc('commission_total')
+            ->limit($limit)
+            ->get();
     }
+
 
     /**
      * Afiliados sin conversiones
      */
     public function affiliatesWithoutConversions()
     {
-        return Affiliate::where('total_conversions', 0)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Affiliate::whereDoesntHave('clicks', function ($q) {
+            $q->whereNotNull('converted_at');
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
     }
+
 
     /**
      * Comisiones por día (últimos 30 días)
@@ -85,6 +95,7 @@ class AffiliateAnalyticsService
         ->orderBy('date')
         ->get();
     }
+
 
     /**
      * Ventas generadas por afiliados (últimos 30 días)
@@ -104,26 +115,32 @@ class AffiliateAnalyticsService
         ->get();
     }
 
+
     /**
-     * Afiliados más activos (por clicks)
+     * Top afiliados por clicks
      */
     public function topAffiliatesByClicks(int $limit = 10)
     {
-        return Affiliate::orderBy('total_clicks', 'DESC')
+        return Affiliate::withCount('clicks')
+            ->orderByDesc('clicks_count')
             ->limit($limit)
             ->get();
     }
 
+
     /**
-     * Conversión más alta
+     * Top afiliados por tasa de conversión
      */
     public function topAffiliatesByConversionRate(int $limit = 10)
     {
-        return Affiliate::where('total_clicks', '>', 0)
-            ->orderBy(DB::raw('(total_conversions / total_clicks)'), 'DESC')
-            ->limit($limit)
-            ->get();
+        return Affiliate::get()->sortByDesc(function ($a) {
+            $clicks = $a->clicks()->count();
+            return $clicks > 0
+                ? ($a->clicks()->whereNotNull('converted_at')->count() / $clicks)
+                : 0;
+        })->take($limit)->values();
     }
+
 
     /**
      * Resumen financiero global
@@ -138,6 +155,7 @@ class AffiliateAnalyticsService
             'payouts_paid'          => AffiliatePayout::where('status','paid')->sum('total_amount'),
         ];
     }
+
 
     /* =========================================================
        ANALÍTICA INDIVIDUAL DEL AFILIADO
@@ -155,6 +173,7 @@ class AffiliateAnalyticsService
             'aov'            => $a->average_order_value,
         ];
     }
+
 
     public function chartsFor(Affiliate $a): array
     {
@@ -184,6 +203,7 @@ class AffiliateAnalyticsService
         ];
     }
 
+
     public function recentOrdersFor(Affiliate $a)
     {
         return Order::whereHas('commissions', fn($q)=>$q->where('affiliate_id',$a->id))
@@ -191,6 +211,7 @@ class AffiliateAnalyticsService
             ->limit(5)
             ->get();
     }
+
 
     public function recentCommissionsFor(Affiliate $a)
     {
@@ -200,12 +221,13 @@ class AffiliateAnalyticsService
             ->get();
     }
 
+
     public function funnelFor(Affiliate $a): array
     {
         return [
             'clicks'      => $a->total_clicks,
             'conversions' => $a->total_conversions,
-            'sales'       => $a->total_sales_count,
+            'sales'       => $a->total_sales,
             'commission'  => $a->total_commission_earned,
         ];
     }

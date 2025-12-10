@@ -1,20 +1,13 @@
 <?php
 
 if (! function_exists('userHasRole')) {
-    function userHasRole($role) {
+    function userHasRole(string $role): bool {
         return auth()->check() && auth()->user()->hasRole($role);
     }
 }
 
 if (! function_exists('userHasAnyRole')) {
-    function userHasAnyRole(...$roles) {
-        if (!auth()->check()) return false;
-
-        foreach ($roles as $role) {
-            if (auth()->user()->hasRole($role)) {
-                return true;
-            }
-        }
-        return false;
+    function userHasAnyRole(...$roles): bool {
+        return auth()->check() && auth()->user()->hasAnyRole($roles);
     }
 }

@@ -9,22 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_roles', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('user_id');
+            $table->uuid('role_id');
 
-            // FK a users
-            $table->foreignId('user_id')
-                ->constrained('users')
+            $table->foreign('user_id')
+                ->references('id')->on('users')
                 ->onDelete('cascade');
 
-            // FK a roles
-            $table->foreignId('role_id')
-                ->constrained('roles')
+            $table->foreign('role_id')
+                ->references('id')->on('roles')
                 ->onDelete('cascade');
 
-            $table->timestamps();
-
-            // evitar duplicados (user_id + role_id)
-            $table->unique(['user_id', 'role_id']);
+            $table->primary(['user_id', 'role_id']);
         });
     }
 
